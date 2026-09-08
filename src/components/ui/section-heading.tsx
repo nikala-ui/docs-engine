@@ -45,6 +45,8 @@ export interface SectionHeadingProps
   badgeVariant?: "default" | "secondary" | "outline" | "destructive";
   /** Optional subtitle or explanatory note below the title */
   description?: string;
+  /** Optional action rendered alongside the heading */
+  actions?: JSX.Element;
   class?: string;
 }
 
@@ -58,6 +60,7 @@ export const SectionHeading: Component<SectionHeadingProps> = (props) => {
     "badge",
     "badgeVariant",
     "description",
+    "actions",
     "variant",
     "class",
   ]);
@@ -66,36 +69,40 @@ export const SectionHeading: Component<SectionHeadingProps> = (props) => {
 
   return (
     <div class={cn("space-y-2", local.class)} {...rest}>
-      <div class={cn("flex items-center gap-2", v() === "section" && "w-full")}>
-        <Show when={v() === "page"}>
-          <h1 class={headingVariants({ variant: v() })}>
-            {local.title}
-          </h1>
-        </Show>
+      <div class={cn("flex items-center justify-between gap-2", v() === "section" && "w-full")}>
+        <div class="flex min-w-0 items-center gap-2">
+          <Show when={v() === "page"}>
+            <h1 class={headingVariants({ variant: v() })}>
+              {local.title}
+            </h1>
+          </Show>
 
-        <Show when={v() === "section"}>
-          <h2 class={cn("w-full", headingVariants({ variant: v() }))}>
-            {local.title}
-          </h2>
-        </Show>
+          <Show when={v() === "section"}>
+            <h2 class={cn("w-full", headingVariants({ variant: v() }))}>
+              {local.title}
+            </h2>
+          </Show>
 
-        <Show when={v() === "compact"}>
-          <h3 class={headingVariants({ variant: v() })}>
-            {local.title}
-          </h3>
-        </Show>
+          <Show when={v() === "compact"}>
+            <h3 class={headingVariants({ variant: v() })}>
+              {local.title}
+            </h3>
+          </Show>
 
-        <Show when={local.badge}>
-          <Badge
-            variant={local.badgeVariant || "outline"}
-            class={cn(
-              "select-none",
-              v() === "page" ? "text-xs" : "font-mono text-[10px] py-0 px-1.5 font-medium"
-            )}
-          >
-            {local.badge}
-          </Badge>
-        </Show>
+          <Show when={local.badge}>
+            <Badge
+              variant={local.badgeVariant || "outline"}
+              class={cn(
+                "select-none",
+                v() === "page" ? "text-xs" : "font-mono text-[10px] py-0 px-1.5 font-medium"
+              )}
+            >
+              {local.badge}
+            </Badge>
+          </Show>
+        </div>
+
+        <Show when={local.actions}>{local.actions}</Show>
       </div>
 
       <Show when={local.description}>

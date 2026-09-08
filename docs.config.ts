@@ -8,6 +8,7 @@ const config: DocsConfig = {
   repository: {
     url: "https://github.com/nikala-ui/docs-engine",
     branch: "main",
+    rootDir: "",
   },
   nav: [
     { title: "Home", href: "/" },

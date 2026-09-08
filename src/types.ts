@@ -31,6 +31,7 @@ export interface PageData {
   slug: string;
   url: string;
   filePath: string;
+  sourcePath?: string;
   frontmatter: Frontmatter;
   toc: TocItem[];
   title: string;

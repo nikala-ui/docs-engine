@@ -12,6 +12,8 @@ import { DocsTableOfContents } from "./content/table-of-contents.jsx";
 import { DocsMobileTableOfContents } from "./navigation/mobile-table-of-contents.jsx";
 import { DocsSearchDialog } from "./overlays/search-dialog.jsx";
 import { cn } from "@/lib/cn";
+import { buttonVariants } from "@/components/ui/button";
+import { getRepositorySourceUrl } from "../../navigation/repository-links.js";
 import type { DocsLayoutProps } from "../types.js";
 
 export const DocsLayout: ParentComponent<DocsLayoutProps> = (props) => {
@@ -44,6 +46,12 @@ export const DocsLayout: ParentComponent<DocsLayoutProps> = (props) => {
   const sidebarLayout = () => local.config.navigation?.layout !== "top";
   const sidebarHeader = () => local.config.navigation?.sidebar?.header !== false;
   const sidebarFooter = () => local.config.navigation?.sidebar?.footer !== false;
+  const sourceUrl = () => {
+    const page = local.currentPage;
+    const repository = local.config.repository;
+    if (!page?.sourcePath || !repository) return undefined;
+    return getRepositorySourceUrl(repository, page.sourcePath, local.config.contentDir || "docs");
+  };
 
   const sidebar = (className?: string) => (
     <DocsSidebar
@@ -68,7 +76,26 @@ export const DocsLayout: ParentComponent<DocsLayoutProps> = (props) => {
             <DocsBreadcrumbs items={local.breadcrumbs!} class="mb-6" />
           </Show>
           <Show when={local.currentPage?.title}>
-            <SectionHeading variant="page" title={local.currentPage!.title} description={local.currentPage?.description} class="mb-8" />
+            <SectionHeading
+              variant="page"
+              title={local.currentPage!.title}
+              description={local.currentPage?.description}
+              class="mb-8"
+              actions={
+                <Show when={sourceUrl()}>
+                  {(url) => (
+                    <a
+                      href={url()}
+                      target="_blank"
+                      rel="noreferrer"
+                      class={cn(buttonVariants({ variant: "secondary", size: "sm" }), "shrink-0")}
+                    >
+                      View source
+                    </a>
+                  )}
+                </Show>
+              }
+            />
           </Show>
           <Show when={showToc()}>
             <DocsMobileTableOfContents items={local.toc!} class="mb-6" />

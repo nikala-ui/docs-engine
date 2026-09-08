@@ -182,6 +182,7 @@ export async function parseMdxFile(filePath: string, contentDir: string): Promis
     slug: url === "/" ? "index" : url.slice(1).replace(/\//g, "-"),
     url,
     filePath,
+    sourcePath: relativePath.replace(/\\/g, "/"),
     frontmatter,
     toc,
     title,

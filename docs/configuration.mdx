@@ -5,8 +5,6 @@ icon: cog
 order: 3
 ---
 
-# Configuration
-
 Nikala Docs Engine loads a TypeScript configuration file from the project
 root. The preferred filename is `docs.config.ts`:
 
@@ -100,6 +98,15 @@ export default {
 
 `logo.image` is served from the consumer project's public assets. Set
 `external: true` for links that should open in a new tab.
+
+When `repository` is configured, the default theme adds a `View source` link
+to each documentation page. The link is built from the repository URL, branch,
+`rootDir`, and the page's path under `contentDir`.
+
+`branch` defaults to `main`. Set `rootDir` when the documentation project is
+nested inside the repository, for example `"apps/docs"`; the configured
+`contentDir` is appended automatically. GitHub, GitLab, and Bitbucket source
+URL formats are supported.
 
 ## Sidebar and navigation layout
 
