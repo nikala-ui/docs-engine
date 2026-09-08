@@ -10,6 +10,7 @@ import { theme as configuredTheme } from "virtual:nikala-docs-theme";
 interface DocsLayoutShellProps {
   config: any;
   tree: SidebarItem[];
+  pages: PageData[];
   currentPage: PageData | undefined;
   breadcrumbs: BreadcrumbItemData[];
   toc: TocItem[];
@@ -23,7 +24,7 @@ export const DocsLayoutShell: ParentComponent<DocsLayoutShellProps> = (props) =>
   if (!ThemeProvider) throw new Error("Nikala Docs theme must provide a ThemeProvider");
   return (
     <ThemeProvider defaultTheme={resolveDefaultThemeMode(props.config)} storageKey="nikala-theme">
-      <configuredTheme.Layout config={props.config} tree={props.tree} currentPage={props.currentPage} breadcrumbs={props.breadcrumbs} toc={props.toc} prev={props.prev} next={props.next} sourceContent={props.sourceContent}>
+      <configuredTheme.Layout config={props.config} tree={props.tree} pages={props.pages} currentPage={props.currentPage} breadcrumbs={props.breadcrumbs} toc={props.toc} prev={props.prev} next={props.next} sourceContent={props.sourceContent}>
         {props.children}
       </configuredTheme.Layout>
     </ThemeProvider>

@@ -24,12 +24,14 @@ import { createClipboard } from "@/hooks/create-clipboard";
 import { Copy, FileText, ChevronDown, ExternalLink } from "lucide-solid";
 import { pageToMarkdown, pageToText, resolvePageActionUrl, sourceToMarkdown } from "../../client/page-actions.js";
 import { getRepositorySourceUrl } from "../../navigation/repository-links.js";
+import { resolveSearchProvider } from "../../search/provider.js";
 import type { DocsLayoutProps } from "../types.js";
 
 export const DocsLayout: ParentComponent<DocsLayoutProps> = (props) => {
   const [local, rest] = splitProps(props, [
     "config",
     "tree",
+    "pages",
     "currentPage",
     "breadcrumbs",
     "toc",
@@ -42,6 +44,7 @@ export const DocsLayout: ParentComponent<DocsLayoutProps> = (props) => {
 
   const [searchOpen, setSearchOpen] = createSignal(false);
   const pageClipboard = createClipboard();
+  const searchProvider = () => resolveSearchProvider(local.config.search);
 
   const currentUrl = () => local.currentPage?.url;
   const landingPage = () =>
@@ -191,7 +194,7 @@ export const DocsLayout: ParentComponent<DocsLayoutProps> = (props) => {
           </Container>
         </Show>
       </Container>
-      <DocsSearchDialog open={searchOpen()} onOpenChange={setSearchOpen} />
+      <DocsSearchDialog open={searchOpen()} onOpenChange={setSearchOpen} pages={local.pages} provider={searchProvider().active} />
     </SidebarInset>
   );
 
@@ -212,7 +215,7 @@ export const DocsLayout: ParentComponent<DocsLayoutProps> = (props) => {
           </Show>
         </Container>
       </Container>
-      <DocsSearchDialog open={searchOpen()} onOpenChange={setSearchOpen} />
+      <DocsSearchDialog open={searchOpen()} onOpenChange={setSearchOpen} pages={local.pages} provider={searchProvider().active} />
     </SidebarInset>
   );
 

@@ -1,5 +1,6 @@
 import type { Component, JSX, ParentComponent } from "solid-js";
 import type { DocsConfig, PageData, TocItem, SidebarItem } from "../types.js";
+import type { BuiltInSearchProvider } from "../search/provider.js";
 
 export type BreadcrumbItemData = { title: string; href?: string };
 
@@ -50,11 +51,13 @@ export interface DocsSearchDialogProps {
   onOpenChange: (open: boolean) => void;
   pages?: PageData[];
   onSelectPage?: (url: string) => void;
+  provider?: BuiltInSearchProvider;
 }
 
 export interface DocsLayoutProps {
   config: DocsConfig;
   tree: SidebarItem[];
+  pages?: PageData[];
   currentPage?: PageData;
   breadcrumbs?: BreadcrumbItemData[];
   toc?: TocItem[];

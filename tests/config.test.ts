@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { resolveDefaultThemeMode } from "../src/theme-mode.js";
+import { resolveSearchProvider } from "../src/search/provider.js";
 
 describe("docs config", () => {
   test("uses the configured default theme mode", () => {
@@ -12,5 +13,17 @@ describe("docs config", () => {
     expect(resolveDefaultThemeMode()).toBe("system");
     expect(resolveDefaultThemeMode({})).toBe("system");
     expect(resolveDefaultThemeMode({ theme: { defaultMode: "sepia" as never } })).toBe("system");
+  });
+
+  test("uses local search by default", () => {
+    expect(resolveSearchProvider().active).toBe("local");
+    expect(resolveSearchProvider({ enabled: true, provider: "local" }).fallback).toBe(false);
+  });
+
+  test("falls back unsupported providers to local search", () => {
+    const resolved = resolveSearchProvider({ enabled: true, provider: "algolia" });
+    expect(resolved.requested).toBe("algolia");
+    expect(resolved.active).toBe("local");
+    expect(resolved.fallback).toBe(true);
   });
 });

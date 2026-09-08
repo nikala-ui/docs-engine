@@ -55,6 +55,7 @@ export const App: Component<AppProps> = (props) => {
     <DocsLayoutShell
       config={config}
       tree={sidebarTree}
+      pages={allPages}
       currentPage={router.currentPage()}
       breadcrumbs={navigation.breadcrumbs()}
       toc={router.activePageModule() ? navigation.toc() : []}

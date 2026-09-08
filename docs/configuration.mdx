@@ -237,7 +237,7 @@ site so production bundles stay small.
 
 ## Search
 
-Local search is enabled by default:
+Local search is enabled by default and is the built-in provider:
 
 ```ts
 export default {
@@ -249,6 +249,10 @@ export default {
 ```
 
 Set `enabled: false` to remove the search trigger from the default theme.
+The default theme currently implements `local`. If `pagefind`, `orama`, or
+`algolia` is selected before a corresponding integration is installed, the
+engine safely falls back to local search instead of rendering a broken search
+dialog. Those providers are reserved for future index adapters.
 
 ## Environment-specific configuration
 
