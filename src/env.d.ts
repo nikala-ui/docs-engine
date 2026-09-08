@@ -24,3 +24,7 @@ declare module "virtual:nikala-docs-components" {
   const components: Record<string, any>;
   export default components;
 }
+
+declare module "virtual:nikala-docs-icons" {
+  export const icons: Record<string, any>;
+}

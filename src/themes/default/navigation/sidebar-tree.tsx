@@ -1,4 +1,5 @@
 import { createEffect, createSignal, For, Show, type Component, type JSX } from "solid-js";
+import { Dynamic } from "solid-js/web";
 import { Collapsible } from "@/components/ui/collapsible";
 import { CollapsibleContent } from "@/components/ui/collapsible";
 import { CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -13,8 +14,9 @@ import { SidebarMenuSubItem } from "@/components/ui/sidebar";
 import { sidebarMenuButtonVariants } from "@/components/ui/sidebar";
 import { useSidebar } from "@/components/ui/sidebar";
 import { cn } from "@/lib/cn";
-import { ChevronRight, FileText, Folder } from "lucide-solid";
+import { ChevronRight, Folder } from "lucide-solid";
 import type { SidebarItem } from "../../../types.js";
+import { resolveDefaultIcon } from "../icons.js";
 import {
   containsActiveSidebarItem,
   containsNewSidebarItem,
@@ -30,6 +32,12 @@ export interface SidebarTreeProps {
 export const SidebarTree: Component<SidebarTreeProps> = (props) => {
   const sidebar = useSidebar();
 
+  const renderIcon = (name: string | undefined, className: string): JSX.Element | undefined => {
+    if (!name) return undefined;
+    const Icon = resolveDefaultIcon(name);
+    return Icon ? <Dynamic component={Icon} class={className} aria-hidden="true" /> : undefined;
+  };
+
   const renderPage = (item: SidebarItem): JSX.Element => (
     <SidebarMenuSubItem>
       <SidebarMenuSubButton
@@ -39,6 +47,7 @@ export const SidebarTree: Component<SidebarTreeProps> = (props) => {
         class="w-full justify-between"
         onClick={() => sidebar.setOpenMobile(false)}
       >
+        {renderIcon(item.icon, "size-3.5 shrink-0")}
         <span class="truncate">{item.title}</span>
         <Show when={isSidebarItemNew(item)}>
           <span class="size-1.5 shrink-0 rounded-lg bg-primary" />
@@ -127,7 +136,7 @@ export const SidebarTree: Component<SidebarTreeProps> = (props) => {
               aria-current={isSidebarItemActive(item, props.currentUrl) ? "page" : undefined}
               class={cn(sidebarMenuButtonVariants({ variant: "default", size: "default" }), "text-sm font-normal")}
             >
-              <FileText class="size-4 shrink-0" />
+              {renderIcon(item.icon, "size-4 shrink-0")}
               <span class="truncate">{item.title}</span>
             </a>
           </SidebarMenuItem>

@@ -1,5 +1,6 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { createRequire } from "node:module";
 import fs from "fs-extra";
 import type { Plugin, ViteDevServer } from "vite";
 import { scanContent, scanContentDirectories } from "../core/content-scanner.js";
@@ -27,6 +28,9 @@ const RESOLVED_ROUTES_ID = "\0" + VIRTUAL_ROUTES_ID;
 const VIRTUAL_COMPONENTS_ID = "virtual:nikala-docs-components";
 const RESOLVED_COMPONENTS_ID = "\0" + VIRTUAL_COMPONENTS_ID;
 
+const VIRTUAL_ICONS_ID = "virtual:nikala-docs-icons";
+const RESOLVED_ICONS_ID = "\0" + VIRTUAL_ICONS_ID;
+
 const VIRTUAL_THEME_ID = "virtual:nikala-docs-theme";
 const RESOLVED_THEME_ID = "\0" + VIRTUAL_THEME_ID;
 
@@ -49,6 +53,15 @@ function findConfigFile(rootDir: string): string | undefined {
   return [...CONFIG_FILENAMES]
     .map((filename) => path.join(rootDir, filename))
     .find((file) => fs.existsSync(file));
+}
+
+function toLucideComponentName(name: string): string {
+  return name
+    .trim()
+    .split(/[-_\s]+/)
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join("");
 }
 
 function escapeHtmlAttribute(value: string): string {
@@ -217,6 +230,7 @@ export function nikalaDocsPlugin(options: NikalaDocsPluginOptions = {}): Plugin 
       if (id === VIRTUAL_TREE_ID) return RESOLVED_TREE_ID;
       if (id === VIRTUAL_ROUTES_ID) return RESOLVED_ROUTES_ID;
       if (id === VIRTUAL_COMPONENTS_ID) return RESOLVED_COMPONENTS_ID;
+      if (id === VIRTUAL_ICONS_ID || id === RESOLVED_ICONS_ID) return RESOLVED_ICONS_ID;
       if (id === VIRTUAL_THEME_ID) return RESOLVED_THEME_ID;
       return null;
     },
@@ -322,6 +336,37 @@ const components = {
 ${entries.join(",\n")}
 };
 export default components;
+`;
+      }
+
+      if (id === RESOLVED_ICONS_ID) {
+        const pages = await scanContent(docsDir);
+        const names = [...new Set(pages.map((page) => page.frontmatter.icon).filter((name): name is string => typeof name === "string" && name.trim().length > 0))];
+        const require = createRequire(path.join(rootDir, "package.json"));
+        const entries: Array<{ name: string; specifier: string }> = [];
+
+        for (const name of names) {
+          const kebabName = name
+            .trim()
+            .replace(/([a-z0-9])([A-Z])/g, "$1-$2")
+            .replace(/[\s_]+/g, "-")
+            .toLowerCase();
+          try {
+            require.resolve(`lucide-solid/icons/${kebabName}`);
+            entries.push({ name, specifier: `lucide-solid/icons/${kebabName}` });
+          } catch {
+            console.warn(`[nikala-docs] Unknown Lucide icon "${name}"; skipping it.`);
+          }
+        }
+
+        const imports = entries.map(({ specifier }, index) => `import icon${index} from ${JSON.stringify(specifier)};`);
+        const iconEntries = entries.map(({ name }, index) => `  ${JSON.stringify(toLucideComponentName(name))}: icon${index}`);
+
+        return `
+${imports.join("\n")}
+export const icons = {
+${iconEntries.join(",\n")}
+};
 `;
       }
 

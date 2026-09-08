@@ -1,6 +1,7 @@
 ---
 title: Configuration
 description: Configure site metadata, navigation, themes, search, and syntax highlighting.
+icon: cog
 order: 3
 ---
 
@@ -152,6 +153,10 @@ export default {
   },
 };
 ```
+
+Page icons use Lucide Icons in the default theme. Pages without an `icon`
+metadata field render without a page icon. Additional icon systems may be
+supported by future theme releases.
 
 Use `css` to add a consumer-owned Tailwind CSS entrypoint. Keep custom colors
 and layout values in semantic design tokens rather than hardcoding them in

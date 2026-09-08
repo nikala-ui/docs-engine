@@ -1,5 +1,12 @@
 // packages/docs/src/types.ts
 
+import type { Component } from "solid-js";
+
+export type DocsIcon = Component<{
+  class?: string;
+  "aria-hidden"?: boolean | "true" | "false";
+}>;
+
 export interface Frontmatter {
   title?: string;
   description?: string;
