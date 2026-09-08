@@ -86,4 +86,25 @@ fn main() {
     expect(result.code).toContain("vitesse-dark");
     expect(result.code).toContain('data-lang="rust"');
   });
+
+  test("uses shiki.langs as the supported language allowlist", async () => {
+    const raw = `
+\`\`\`typescript
+const supported: string = "yes";
+\`\`\`
+
+\`\`\`python
+print("fallback")
+\`\`\`
+`;
+
+    const result = await compileMdx(raw, {
+      shiki: {
+        langs: ["typescript"],
+      },
+    });
+
+    expect(result.code).toContain('data-lang="typescript"');
+    expect(result.code).toContain('data-lang="text"');
+  });
 });

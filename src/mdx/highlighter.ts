@@ -10,6 +10,8 @@ import type { ShikiConfig } from "../types.js";
 
 let highlighterPromise: Promise<Highlighter> | null = null;
 let activeShikiConfig: ShikiConfig | null = null;
+let activeShikiConfigKey: string | null = null;
+let activeAllowedLanguages: Set<string> | null = null;
 
 const DEFAULT_BASE_LANGS: BundledLanguage[] = [
   "typescript",
@@ -71,16 +73,29 @@ const createDocsHighlighter = createBundledHighlighter({
 
 export function configureDocsHighlighter(config: ShikiConfig): void {
   activeShikiConfig = config;
+  activeShikiConfigKey = JSON.stringify(config);
+  activeAllowedLanguages = config.langs
+    ? new Set(config.langs.map(normalizeLangAlias).filter((lang) => lang in languageLoaders))
+    : null;
   highlighterPromise = null; // Re-initialize with new configuration
 }
 
 export async function getDocsHighlighter(config?: ShikiConfig): Promise<Highlighter> {
+  const configKey = JSON.stringify(config ?? null);
+  if (configKey !== activeShikiConfigKey) {
+    configureDocsHighlighter(config ?? {});
+  }
+
   if (!highlighterPromise) {
+    const configuredLanguages = activeShikiConfig?.langs
+      ?.map(normalizeLangAlias)
+      .filter((lang): lang is BundledLanguage => lang in languageLoaders) as BundledLanguage[] | undefined;
+
     highlighterPromise = createDocsHighlighter({
       // Keep the core highlighter small. Project-specific themes and
       // languages are loaded by ensureTheme/ensureLanguage on demand.
       themes: [DEFAULT_LIGHT_THEME, DEFAULT_DARK_THEME],
-      langs: DEFAULT_BASE_LANGS,
+      langs: configuredLanguages ?? DEFAULT_BASE_LANGS,
     }) as Promise<Highlighter>;
   }
 
@@ -96,6 +111,10 @@ export async function ensureLanguage(highlighter: Highlighter, rawLang: string):
   const normalized = normalizeLangAlias(rawLang);
 
   if (!normalized || normalized === "text" || normalized === "txt" || normalized === "plain") {
+    return "text";
+  }
+
+  if (activeAllowedLanguages && !activeAllowedLanguages.has(normalized)) {
     return "text";
   }
 
