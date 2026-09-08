@@ -1,4 +1,5 @@
 import { defaultTheme } from "../../themes/default/index.js";
+import { resolveDefaultThemeMode } from "../../theme-mode.js";
 import type { BreadcrumbItemData } from "../../themes/types.js";
 import type { PageData, SidebarItem, TocItem } from "../../types.js";
 import type { ParentComponent } from "solid-js";
@@ -20,7 +21,7 @@ export const DocsLayoutShell: ParentComponent<DocsLayoutShellProps> = (props) =>
   const ThemeProvider = configuredTheme.Provider || defaultTheme.Provider;
   if (!ThemeProvider) throw new Error("Nikala Docs theme must provide a ThemeProvider");
   return (
-    <ThemeProvider defaultTheme="system" storageKey="nikala-theme">
+    <ThemeProvider defaultTheme={resolveDefaultThemeMode(props.config)} storageKey="nikala-theme">
       <configuredTheme.Layout config={props.config} tree={props.tree} currentPage={props.currentPage} breadcrumbs={props.breadcrumbs} toc={props.toc} prev={props.prev} next={props.next}>
         {props.children}
       </configuredTheme.Layout>

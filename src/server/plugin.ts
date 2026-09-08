@@ -7,6 +7,7 @@ import { scanContent, scanContentDirectories } from "../core/content-scanner.js"
 import { buildSidebarTree } from "../core/route-tree.js";
 import { compileMdx } from "../mdx/compiler.js";
 import { loadConfig } from "../config.js";
+import { resolveDefaultThemeMode } from "../theme-mode.js";
 import type { DocsConfig, PageData } from "../types.js";
 
 export interface NikalaDocsPluginOptions {
@@ -213,10 +214,11 @@ export function nikalaDocsPlugin(options: NikalaDocsPluginOptions = {}): Plugin 
 
     transformIndexHtml(html) {
       const favicon = resolvedConfig.favicon || "/favicon.ico";
+      const defaultTheme = resolveDefaultThemeMode(resolvedConfig);
       return html.replace(
         /<link rel="icon" href="[^"]*"\s*\/>/i,
         `<link rel="icon" href="${escapeHtmlAttribute(favicon)}" />`,
-      );
+      ).replaceAll("__NIKALA_DEFAULT_THEME__", defaultTheme);
     },
 
     resolveId(id, importer) {

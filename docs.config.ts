@@ -19,7 +19,7 @@ const config: DocsConfig = {
     layout: "sidebar",
     sidebar: {
       header: true,
-      footer: true,
+      footer: false,
       headerSubtitle: "Documentation Engine",
       footerText: "Nikala Docs Engine",
     },

@@ -154,6 +154,21 @@ export default {
 };
 ```
 
+`theme.defaultMode` sets the initial color mode when the visitor has not
+chosen a preference yet:
+
+```ts
+// docs.config.ts
+export default {
+  theme: {
+    defaultMode: "dark",
+  },
+};
+```
+
+Use `"light"`, `"dark"`, or `"system"`. A mode already saved by the visitor
+in local storage takes precedence over this default.
+
 Page icons use Lucide Icons in the default theme. Pages without an `icon`
 metadata field render without a page icon. Additional icon systems may be
 supported by future theme releases.
