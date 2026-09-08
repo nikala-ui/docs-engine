@@ -16,12 +16,18 @@ application it documents.
 
 ## Generate tokens with Nikala CLI
 
-If the project uses Nikala UI, the CLI can generate the primary accent and
-base gray palette:
+Every generated Nikala Docs project includes Nikala UI's local CLI workflow.
+Use it to generate the primary accent and base gray palette:
 
-```bash
-bunx @nikala-ui/cli theme set amber zinc
-```
+<PackageManagerTabs
+  managers={["bunx", "pnpm", "npx", "yarn"]}
+  commands={{
+    bunx: "bunx @nikala-ui/cli theme set amber zinc",
+    pnpm: "pnpm dlx @nikala-ui/cli theme set amber zinc",
+    npx: "npx @nikala-ui/cli theme set amber zinc",
+    yarn: "yarn dlx @nikala-ui/cli theme set amber zinc"
+  }}
+/>
 
 The first value selects the primary accent and the second selects the base
 gray palette. The command updates the local Tailwind CSS entrypoint and the
@@ -29,12 +35,18 @@ project's `nikala.config.json` values.
 
 The interactive form is also available:
 
-```bash
-bunx @nikala-ui/cli theme
-```
+<PackageManagerTabs
+  managers={["bunx", "pnpm", "npx", "yarn"]}
+  commands={{
+    bunx: "bunx @nikala-ui/cli theme",
+    pnpm: "pnpm dlx @nikala-ui/cli theme",
+    npx: "npx @nikala-ui/cli theme",
+    yarn: "yarn dlx @nikala-ui/cli theme"
+  }}
+/>
 
-Run these commands from the project root. They require a project initialized
-with Nikala UI and a local `nikala.config.json`.
+Run these commands from the project root. The interactive command writes the
+selected values to the project's local CSS entrypoint and `nikala.config.json`.
 
 ## Use tweakcn
 

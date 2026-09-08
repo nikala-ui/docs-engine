@@ -17,6 +17,19 @@ import { DocsSearchDialog } from "./overlays/search-dialog.jsx";
 import { ThemeProvider } from "@/providers/theme-provider";
 import type { DocsThemeContract } from "../types.js";
 
+export type {
+  BreadcrumbItemData,
+  DocsBreadcrumbsProps,
+  DocsLayoutProps,
+  DocsNavbarProps,
+  DocsPaginationProps,
+  DocsPagerProps,
+  DocsSearchDialogProps,
+  DocsSidebarProps,
+  DocsTableOfContentsProps,
+  DocsThemeContract,
+} from "../types.js";
+
 export const defaultTheme: DocsThemeContract = {
   name: "default",
   Provider: ThemeProvider,

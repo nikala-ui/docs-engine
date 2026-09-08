@@ -14,7 +14,8 @@ docs theme contract.
 
 ## Configure the theme path
 
-Point `theme.path` at the local theme directory or entrypoint:
+Point `theme.path` at the local theme directory or entrypoint in the project's
+`docs.config.ts`:
 
 ```ts
 // docs.config.ts
@@ -30,12 +31,15 @@ consumer project so its layout and styling remain fully owned by that project.
 
 ## Theme contract
 
-A theme exports a contract with a required `name` and `Layout`. Other
-components are optional and can be supplied when the theme needs to replace
-the default navbar, sidebar, table of contents, breadcrumbs, pager, or search
-dialog:
+A custom theme is defined in the consumer project, not inside the package.
+Create `src/themes/custom/index.tsx` next to the project's `docs.config.ts`.
+That module must export a default `DocsThemeContract` object with the required
+`name` and `Layout` fields. Other components are optional and can replace the
+default navbar, sidebar, table of contents, breadcrumbs, pager, or search
+dialog.
 
 ```tsx
+// src/themes/custom/index.tsx
 import type { DocsThemeContract } from "@nikala-ui/docs/theme";
 import { CustomLayout } from "./layout";
 
@@ -47,9 +51,25 @@ const customTheme: DocsThemeContract = {
 export default customTheme;
 ```
 
+The `Layout` component itself can live in the same directory:
+
+```tsx
+// src/themes/custom/layout.tsx
+import type { Component } from "solid-js";
+import type { DocsLayoutProps } from "@nikala-ui/docs/theme";
+
+export const CustomLayout: Component<DocsLayoutProps> = (props) => (
+  <main>
+    <h1>{props.currentPage?.title}</h1>
+    {props.children}
+  </main>
+);
+```
+
 The layout receives the resolved site configuration, navigation tree, current
-page, table-of-contents data, and previous/next page links. Use those values
-instead of coupling the theme to a specific documentation site's content.
+page, table-of-contents data, and previous/next page links through
+`DocsLayoutProps`. Use those values instead of coupling the theme to a
+specific documentation site's content.
 
 ## Keep runtime behavior separate
 
