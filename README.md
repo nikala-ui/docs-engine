@@ -1,30 +1,69 @@
 # @nikala-ui/docs
 
-`@nikala-ui/docs` is a file-based documentation engine for SolidJS projects. It uses MDX, Vite, and Tailwind CSS v4 to build customizable documentation sites with local, copy-paste-owned components and hooks.
+`@nikala-ui/docs` is a file-based documentation engine for SolidJS projects.
+It compiles MDX content with Vite, renders server-side pages, and provides a
+responsive documentation theme with navigation, search, syntax highlighting,
+and Tailwind CSS v4 design tokens.
 
-## What it provides
+## Features
 
-- MDX documentation with file-based routes.
-- Automatic sidebar categories from directories inside `docs/`.
-- Static production builds with server-rendered page content.
-- Development server with configuration and content hot reload.
-- Customizable SolidJS themes and layouts.
-- Syntax highlighting, table of contents, breadcrumbs, pagination, search, and dark mode.
-- Local Nikala UI component and reactive hook sources generated inside the consuming project.
-- Tailwind CSS v4 theme tokens generated as part of the project setup.
+- File-based MDX routes from a configurable content directory.
+- Automatic sidebar categories derived from content directories.
+- Server-rendered production pages with client-side navigation.
+- Responsive sidebar, top navigation, breadcrumbs, table of contents, and
+  previous/next page navigation.
+- Local search and configurable page metadata.
+- Shiki syntax highlighting with lazy language and theme loading.
+- Custom themes, layouts, components, CSS, logos, and site metadata.
+- CLI initialization for a complete documentation project.
 
-The generated project does not import `@nikala-ui/core` or `@nikala-ui/hooks` at runtime. Components are copied into `src/components/ui`, and hooks are copied into `src/hooks`, so the consuming project owns and can modify the source code.
-
-## Create a documentation project
-
-Install the package in an existing SolidJS project or use the initializer to create the documentation structure:
+The default theme uses the Nikala UI design system. Additional Nikala UI
+capabilities can be added from a generated project with:
 
 ```bash
-bun add @nikala-ui/docs
-bunx @nikala-ui/docs init .
+bunx @nikala-ui/cli
 ```
 
-The initializer creates the following project files and directories:
+## Installation
+
+Install the engine in an existing SolidJS project with your preferred package
+manager:
+
+```bash
+# Bun
+bun add @nikala-ui/docs
+
+# pnpm
+pnpm add @nikala-ui/docs
+
+# npm
+npm install @nikala-ui/docs
+
+# yarn
+yarn add @nikala-ui/docs
+```
+
+## Initialize a project
+
+Run the initializer from the project directory:
+
+```bash
+# Bun
+bunx @nikala-ui/docs init .
+
+# pnpm
+pnpm dlx @nikala-ui/docs init .
+
+# npm
+npx @nikala-ui/docs init .
+
+# yarn
+yarn dlx @nikala-ui/docs init .
+```
+
+The initializer creates the documentation structure, prepares the default
+theme, configures the `@/*` TypeScript alias, and installs the dependencies
+required by the generated project.
 
 ```text
 .
@@ -32,6 +71,8 @@ The initializer creates the following project files and directories:
 │   └── index.mdx
 ├── docs.config.ts
 ├── nikala.config.json
+├── public/
+│   └── favicon.ico
 └── src/
     ├── components/ui/
     ├── hooks/
@@ -41,61 +82,53 @@ The initializer creates the following project files and directories:
     └── themes/default/
 ```
 
-The initializer also runs the Nikala UI project setup and installs the dependencies required by the generated local sources.
+The generated project receives `dev`, `build`, and `preview` scripts when
+they are not already defined. Existing `docs.config.ts` and
+`nikala.config.json` files are preserved.
 
-## Development and production commands
+## Run a documentation project
 
-From the documentation project root:
+From the generated project root:
 
 ```bash
-# Start the development server
-bunx @nikala-ui/docs dev
+# Development server
+bun run dev
 
-# Build the production site into dist/
-bunx @nikala-ui/docs build
+# Production build
+bun run build
 
-# Preview the production build
-bunx @nikala-ui/docs preview
+# Production preview
+bun run preview
 ```
 
-Generated projects contain the same commands in `package.json`:
+The equivalent commands are `pnpm run ...`, `npm run ...`, and `yarn ...`.
+The default development server runs at `http://localhost:1862/`.
 
-```json
-{
-  "scripts": {
-    "dev": "bunx @nikala-ui/docs dev",
-    "build": "bunx @nikala-ui/docs build",
-    "preview": "bunx @nikala-ui/docs preview"
-  }
-}
+The CLI commands can also be run directly:
+
+```bash
+bunx @nikala-ui/docs dev
+bunx @nikala-ui/docs build
+bunx @nikala-ui/docs preview
 ```
 
 ## Content structure
 
-The default content directory is `docs/`. Every MDX file becomes a route, and directories become automatic sidebar categories.
+The default content directory is `docs/`. Every MDX file becomes a route and
+directories become sidebar categories:
 
 ```text
 docs/
-├── index.mdx
-├── getting-started.mdx
+├── index.mdx              -> /
+├── getting-started.mdx    -> /getting-started
 ├── components/
-│   ├── button.mdx
-│   └── dialog.mdx
+│   ├── button.mdx         -> /components/button
+│   └── dialog.mdx         -> /components/dialog
 └── guides/
-    └── theming.mdx
+    └── theming.mdx        -> /guides/theming
 ```
 
-This produces routes such as:
-
-```text
-/
-/getting-started
-/components/button
-/components/dialog
-/guides/theming
-```
-
-Page metadata can be defined with frontmatter:
+Page metadata is defined with frontmatter:
 
 ```mdx
 ---
@@ -110,77 +143,70 @@ toc: true
 Button documentation goes here.
 ```
 
-Supported metadata includes `title`, `description`, `order`, `categoryOrder`, `icon`, `badge`, `addedAt`, `prev`, `next`, and `toc`.
+Supported page metadata includes `title`, `description`, `order`,
+`categoryOrder`, `icon`, `badge`, `addedAt`, `prev`, `next`, and `toc`.
 
 ## Configuration
 
-Create or edit `docs.config.ts` in the project root:
+Create `docs.config.ts` in the project root:
 
 ```ts
-export default {
+import type { DocsConfig } from "@nikala-ui/docs";
+
+const config: DocsConfig = {
   title: "Project Documentation",
-  description: "Documentation for my SolidJS project",
-  siteUrl: "https://example.com",
+  description: "Documentation for my SolidJS project.",
+  siteUrl: "https://docs.example.com",
   contentDir: "docs",
-  css: "src/index.css",
+  favicon: "/favicon.ico",
+  nav: [{ title: "Home", href: "/" }],
   navigation: {
     layout: "sidebar",
     sidebar: {
       header: true,
       footer: false,
-      headerSubtitle: "Developer Documentation",
-      footerText: "Documentation",
+      headerSubtitle: "Documentation",
     },
   },
   search: {
     enabled: true,
-    provider: "local",
-  },
-  theme: {
-    path: "./src/themes/default",
-    defaultMode: "system",
   },
 };
+
+export default config;
 ```
 
-Available configuration areas include:
+See the [Configuration](/configuration) guide for the supported options.
 
-- `title`, `description`, `siteUrl`, and `favicon` for document metadata and browser branding.
-- `contentDir` for the MDX content root.
-- `css` for the local Tailwind CSS entrypoint and semantic design tokens.
-- `logo` for text, image, and logo link configuration.
-- `repository` for source repository links.
-- `nav` for top-level navigation items.
-- `sidebar` for explicit sidebar entries or automatic directory discovery.
-- `navigation` for sidebar or top navigation layout settings.
-- `theme` for the selected local theme path and color mode.
-- `shiki` for code themes and supported languages.
-- `search` for search enablement and provider selection.
+## Customize the theme
 
-## Custom themes
+The generated default theme is under `src/themes/default`. It can be
+modified directly or replaced with a custom theme configured through
+`theme.path`.
 
-The generated project includes the starter theme under `src/themes/default`. Modify it directly or rename the directory to any name you prefer, then update `theme.path` in `docs.config.ts`.
+The generated `src/index.css` contains the Tailwind CSS v4 entrypoint and
+semantic design tokens. Customize those tokens to change the site's colors,
+typography, spacing, and other visual properties.
 
-The generated `src/index.css` contains the Tailwind CSS v4 imports and semantic design tokens. Update those tokens to customize the light and dark color schemes without replacing the documentation engine.
+## Develop the engine
 
-## Local components and hooks
-
-The initializer copies the component and hook sources needed by the generated documentation theme into the project:
-
-```ts
-import { Button } from "@/components/ui/button";
-import { createClipboard } from "@/hooks/create-clipboard";
-```
-
-The sources are ordinary project files. They can be inspected, customized, and extended without depending on a runtime UI registry package.
-
-## Package development
-
-Build the Docs Engine package from the repository root with:
+Clone the repository and install its dependencies:
 
 ```bash
+git clone https://github.com/nikala-ui/docs-engine.git
+cd docs-engine
 bun install
-bun run build
 ```
 
-The build bundles the documentation engine, registry manifests, and local source snapshots required by `@nikala-ui/docs init`.
+Useful repository commands:
+
+```bash
+bun test tests       # Run tests
+bun run build        # Build the engine and CLI into dist/
+bun run dev          # TypeScript watch mode
+bun run docs:dev     # Run the self-hosted docs site
+bun run docs:build   # Build the self-hosted site into .docs-dist/
+bun run docs:preview # Preview the self-hosted production site
+```
+
+Read [Contributing](/contributing) before opening a pull request.
