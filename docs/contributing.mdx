@@ -1,0 +1,31 @@
+---
+title: Contributing
+description: Development workflow and quality standards for Nikala Docs Engine.
+order: 4
+---
+
+# Contributing
+
+Nikala Docs Engine is developed in the open. Before opening a pull request, read the repository [contribution guide](https://github.com/nikala-ui/docs-engine/blob/main/CONTRIBUTING.md).
+
+## Local workflow
+
+```bash
+bun install
+bun test tests
+bun run build
+```
+
+Changes to runtime behavior should include a focused test. Changes to the public configuration or CLI should update this documentation site as part of the same pull request.
+
+## Project boundaries
+
+- Keep the engine framework-specific only where the current SolidJS contract requires it.
+- Keep generated consumer sources locally owned and free from runtime dependency on `@nikala-ui/core` or `@nikala-ui/hooks`.
+- Preserve SSR safety: browser APIs must be guarded for non-browser rendering.
+- Preserve SolidJS reactivity: do not destructure reactive props directly.
+- Keep production bundles lazy, especially Shiki language and theme modules.
+
+## Pull requests
+
+Use a focused branch and describe the user-visible behavior, tests run, and any migration impact. Keep unrelated formatting or generated output out of the change.

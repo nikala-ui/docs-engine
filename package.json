@@ -47,6 +47,9 @@
   },
   "scripts": {
     "build": "bun scripts/build.ts",
+    "docs:dev": "bun run build && bun dist/cli/index.js dev",
+    "docs:build": "bun run build && bun dist/cli/index.js build -o .docs-dist",
+    "docs:preview": "bun run build && bun dist/cli/index.js build -o .docs-dist && bun dist/cli/index.js preview -o .docs-dist",
     "dev": "tsc -p tsconfig.build.json --watch"
   },
   "dependencies": {

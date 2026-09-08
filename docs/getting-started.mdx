@@ -1,0 +1,58 @@
+---
+title: Getting Started
+description: Install Nikala Docs Engine and create your first documentation project.
+order: 2
+---
+
+# Getting Started
+
+## Install the engine
+
+Install the package in an existing SolidJS project:
+
+```bash
+bun add @nikala-ui/docs
+```
+
+Or scaffold a documentation project directly:
+
+```bash
+bunx @nikala-ui/docs init .
+```
+
+The initializer creates `docs/`, `docs.config.ts`, local UI sources, hooks, providers, and the default theme.
+
+## Create a page
+
+Add an MDX file under `docs/`:
+
+```mdx
+---
+title: Installation
+description: Install the dependencies for your project.
+order: 1
+---
+
+# Installation
+
+Install the package with your preferred package manager.
+```
+
+The file becomes a route based on its path. Directories automatically become sidebar categories.
+
+## Run the site
+
+```bash
+bunx @nikala-ui/docs dev
+```
+
+Build and preview a production site with:
+
+```bash
+bunx @nikala-ui/docs build
+bunx @nikala-ui/docs preview
+```
+
+<Callout type="warning">
+  The generated project owns its copied components and hooks. You can modify them directly without depending on Nikala UI at runtime.
+</Callout>

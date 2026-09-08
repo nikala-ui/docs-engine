@@ -1,0 +1,60 @@
+---
+title: Configuration
+description: Configure the site, navigation, theme, search, and syntax highlighting.
+order: 3
+---
+
+# Configuration
+
+Nikala Docs Engine reads `docs.config.ts` from the documentation project root.
+
+## Basic configuration
+
+```ts
+import type { DocsConfig } from "@nikala-ui/docs";
+
+const config: DocsConfig = {
+  title: "My Project Docs",
+  description: "Documentation for my project.",
+  contentDir: "docs",
+  favicon: "/favicon.ico",
+  nav: [{ title: "Home", href: "/" }],
+};
+
+export default config;
+```
+
+## Navigation
+
+The default `sidebar: "auto"` mode builds navigation from the content tree. Use frontmatter `order` values to control sibling order and `categoryOrder` to control category order.
+
+```ts
+export default {
+  navigation: {
+    layout: "sidebar",
+    sidebar: {
+      header: true,
+      footer: true,
+      headerSubtitle: "Documentation",
+      footerText: "My Project",
+    },
+  },
+};
+```
+
+## Syntax highlighting
+
+Shiki themes are configured independently for light and dark mode:
+
+```ts
+export default {
+  shiki: {
+    themes: {
+      light: "github-light",
+      dark: "github-dark",
+    },
+  },
+};
+```
+
+Languages and custom themes are loaded on demand, so a project does not need to ship the complete Shiki catalog in its initial bundle.
