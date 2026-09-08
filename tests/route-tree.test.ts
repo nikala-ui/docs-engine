@@ -40,7 +40,7 @@ const mockPages: PageData[] = [
     filePath: "content/components/index.mdx",
     title: "Components",
     toc: [],
-    frontmatter: { order: 1, categoryOrder: 2 },
+    frontmatter: { order: 1, categoryOrder: 2, icon: "palette" },
   },
   {
     slug: "components-button",
@@ -81,6 +81,7 @@ describe("route-tree", () => {
 
       expect(tree[1].title).toBe("Components");
       expect(tree[1].href).toBe("/components");
+      expect(tree[1].icon).toBe("palette");
       expect(tree[1].items).toHaveLength(2);
       expect(tree[1].items?.[0].title).toBe("Button");
       expect(tree[1].items?.[1].title).toBe("Dialog");

@@ -13,6 +13,7 @@ import { SidebarMenuSubButton } from "@/components/ui/sidebar";
 import { SidebarMenuSubItem } from "@/components/ui/sidebar";
 import { sidebarMenuButtonVariants } from "@/components/ui/sidebar";
 import { useSidebar } from "@/components/ui/sidebar";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/cn";
 import { ChevronRight, Folder } from "lucide-solid";
 import type { SidebarItem } from "../../../types.js";
@@ -32,6 +33,12 @@ export interface SidebarTreeProps {
 export const SidebarTree: Component<SidebarTreeProps> = (props) => {
   const sidebar = useSidebar();
 
+  const renderCategoryIcon = (name: string | undefined): JSX.Element => (
+    <Show when={renderIcon(name, "size-4 shrink-0")} fallback={<Folder class="size-4 shrink-0" />}>
+      {renderIcon(name, "size-4 shrink-0")}
+    </Show>
+  );
+
   const renderIcon = (name: string | undefined, className: string): JSX.Element | undefined => {
     if (!name) return undefined;
     const Icon = resolveDefaultIcon(name);
@@ -44,11 +51,11 @@ export const SidebarTree: Component<SidebarTreeProps> = (props) => {
         href={item.href || "#"}
         isActive={isSidebarItemActive(item, props.currentUrl)}
         aria-current={isSidebarItemActive(item, props.currentUrl) ? "page" : undefined}
-        class="w-full justify-between"
+        class="w-full"
         onClick={() => sidebar.setOpenMobile(false)}
       >
         {renderIcon(item.icon, "size-3.5 shrink-0")}
-        <span class="truncate">{item.title}</span>
+        <span class="min-w-0 flex-1 truncate">{item.title}</span>
         <Show when={isSidebarItemNew(item)}>
           <span class="size-1.5 shrink-0 rounded-lg bg-primary" />
         </Show>
@@ -95,20 +102,50 @@ export const SidebarTree: Component<SidebarTreeProps> = (props) => {
         <SidebarGroupContent class="w-full">
           <SidebarMenu>
             <SidebarMenuItem class="w-full flex-col items-stretch">
-              <SidebarMenuButton
-                type="button"
-                class="w-full justify-between font-normal"
-                tooltip={group.title}
-                aria-expanded={open()}
-                onClick={() => setOpen((value) => !value)}
+              <Show
+                when={group.href}
+                fallback={
+                  <SidebarMenuButton
+                    type="button"
+                    class="w-full justify-between font-normal"
+                    tooltip={group.title}
+                    aria-expanded={open()}
+                    onClick={() => setOpen((value) => !value)}
+                  >
+                    {renderCategoryIcon(group.icon)}
+                    <span class="flex-1 truncate group-data-[collapsible=icon]:hidden">{group.title}</span>
+                    <Show when={containsNewSidebarItem(group)}>
+                      <span class="size-1.5 shrink-0 rounded-lg bg-primary" />
+                    </Show>
+                    <ChevronRight class={cn("ml-auto size-3.5 shrink-0 transition-transform group-data-[collapsible=icon]:hidden", open() && "rotate-90")} />
+                  </SidebarMenuButton>
+                }
               >
-                <Folder class="size-4 shrink-0" />
-                <span class="flex-1 truncate group-data-[collapsible=icon]:hidden">{group.title}</span>
-                <Show when={containsNewSidebarItem(group)}>
-                  <span class="size-1.5 shrink-0 rounded-lg bg-primary" />
-                </Show>
-                <ChevronRight class={cn("ml-auto size-3.5 shrink-0 transition-transform group-data-[collapsible=icon]:hidden", open() && "rotate-90")} />
-              </SidebarMenuButton>
+                <SidebarMenuButton
+                  href={group.href}
+                  class="min-w-0 flex-1 pr-10 font-normal group-data-[collapsible=icon]:pr-0"
+                  tooltip={group.title}
+                  isActive={isSidebarItemActive(group, props.currentUrl)}
+                  aria-current={isSidebarItemActive(group, props.currentUrl) ? "page" : undefined}
+                  onClick={() => sidebar.setOpenMobile(false)}
+                >
+                  {renderCategoryIcon(group.icon)}
+                  <span class="flex-1 truncate group-data-[collapsible=icon]:hidden">{group.title}</span>
+                  <Show when={containsNewSidebarItem(group)}>
+                    <span class="size-1.5 shrink-0 rounded-lg bg-primary" />
+                  </Show>
+                </SidebarMenuButton>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  class="absolute right-1 top-0 size-8 group-data-[collapsible=icon]:hidden"
+                  aria-label={`${open() ? "Collapse" : "Expand"} ${group.title}`}
+                  aria-expanded={open()}
+                  onClick={() => setOpen((value) => !value)}
+                >
+                  <ChevronRight class={cn("size-3.5 transition-transform", open() && "rotate-90")} />
+                </Button>
+              </Show>
               <Show when={open()}>
                 <div class="w-full group-data-[collapsible=icon]:hidden">
                   <SidebarMenuSub class="w-full">

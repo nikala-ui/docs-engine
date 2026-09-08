@@ -514,6 +514,7 @@ export interface SidebarMenuButtonProps
     VariantProps<typeof sidebarMenuButtonVariants> {
   isActive?: boolean;
   tooltip?: string;
+  href?: string;
   class?: string;
 }
 
@@ -523,6 +524,7 @@ export const SidebarMenuButton: ParentComponent<SidebarMenuButtonProps> = (props
     "tooltip",
     "variant",
     "size",
+    "href",
     "class",
     "children",
   ]);
@@ -532,19 +534,38 @@ export const SidebarMenuButton: ParentComponent<SidebarMenuButtonProps> = (props
   const tooltipPlacement = () => (sidebar.side() === "right" ? "left" : "right");
 
   const buttonElement = () => (
-    <button
-      type="button"
-      data-sidebar="menu-button"
-      data-size={local.size}
-      data-active={local.isActive ? "true" : "false"}
-      class={cn(
-        sidebarMenuButtonVariants({ variant: local.variant, size: local.size }),
-        local.class
-      )}
-      {...rest}
+    <Show
+      when={local.href}
+      fallback={
+        <button
+          type="button"
+          data-sidebar="menu-button"
+          data-size={local.size}
+          data-active={local.isActive ? "true" : "false"}
+          class={cn(
+            sidebarMenuButtonVariants({ variant: local.variant, size: local.size }),
+            local.class
+          )}
+          {...rest}
+        >
+          {local.children}
+        </button>
+      }
     >
-      {local.children}
-    </button>
+      <a
+        href={local.href}
+        data-sidebar="menu-button"
+        data-size={local.size}
+        data-active={local.isActive ? "true" : "false"}
+        class={cn(
+          sidebarMenuButtonVariants({ variant: local.variant, size: local.size }),
+          local.class
+        )}
+        {...(rest as unknown as JSX.AnchorHTMLAttributes<HTMLAnchorElement>)}
+      >
+        {local.children}
+      </a>
+    </Show>
   );
 
   return (

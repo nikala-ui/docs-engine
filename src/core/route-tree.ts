@@ -103,6 +103,7 @@ export function buildSidebarTree(pages: PageData[], directories: string[] = []):
     const group: SidebarItem = {
       title: formatGroupName(cat),
       href: categoryIndex?.url,
+      icon: categoryIndex?.frontmatter.icon,
       items: [],
     };
 
