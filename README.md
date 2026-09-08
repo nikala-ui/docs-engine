@@ -176,10 +176,11 @@ The sources are ordinary project files. They can be inspected, customized, and e
 
 ## Package development
 
-Build this package from the Nikala UI monorepo with:
+Build the Docs Engine package from the repository root with:
 
 ```bash
-bun run build:docs
+bun install
+bun run build
 ```
 
 The build bundles the documentation engine, registry manifests, and local source snapshots required by `@nikala-ui/docs init`.

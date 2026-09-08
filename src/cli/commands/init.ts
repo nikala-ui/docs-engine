@@ -256,7 +256,10 @@ async function writeProjectFiles(root: string, registryDependencies: string[]): 
   const commandDir = path.dirname(fileURLToPath(import.meta.url));
   const docsPackageRoot = path.resolve(commandDir, "../../..");
   const workspaceRoot = path.resolve(docsPackageRoot, "../..");
-  const isWorkspacePackage = await fs.pathExists(path.join(docsPackageRoot, "src"));
+  const workspaceManifestPath = path.join(workspaceRoot, "package.json");
+  const isWorkspacePackage = await fs.pathExists(workspaceManifestPath)
+    && (await fs.readJson(workspaceManifestPath)).workspaces?.includes("packages/*")
+    && docsPackageRoot === path.join(workspaceRoot, "packages/docs");
   const targetIsInWorkspace = root === workspaceRoot || root.startsWith(`${workspaceRoot}${path.sep}`);
   const defaultPackageJson = {
     name: "nikala-docs-example",
@@ -271,6 +274,8 @@ async function writeProjectFiles(root: string, registryDependencies: string[]): 
     ...existingPackageJson,
     scripts: { ...defaultPackageJson.scripts, ...existingPackageJson.scripts },
   };
+  const docsPackageManifest = await fs.readJson(path.join(docsPackageRoot, "package.json"));
+  const publishedDocsVersion = `^${docsPackageManifest.version}`;
   const localDocsLink = path.join(root, "node_modules/@nikala-ui/docs");
   const hasLocalDocsLink = await fs.pathExists(localDocsLink) && (await fs.lstat(localDocsLink)).isSymbolicLink();
   const docsDependency = hasLocalDocsLink
@@ -279,7 +284,7 @@ async function writeProjectFiles(root: string, registryDependencies: string[]): 
       ? targetIsInWorkspace
         ? "workspace:*"
         : "link:@nikala-ui/docs"
-      : packageJson.dependencies?.["@nikala-ui/docs"] || "latest";
+      : packageJson.dependencies?.["@nikala-ui/docs"] || publishedDocsVersion;
   packageJson.dependencies = {
     ...packageJson.dependencies,
     "@nikala-ui/docs": docsDependency,

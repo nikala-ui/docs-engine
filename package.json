@@ -43,8 +43,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/nikala-ui/ui.git",
-    "directory": "packages/docs"
+    "url": "git+https://github.com/nikala-ui/docs-engine.git"
   },
   "scripts": {
     "build": "bun scripts/build.ts",
