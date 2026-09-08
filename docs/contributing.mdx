@@ -4,28 +4,134 @@ description: Development workflow and quality standards for Nikala Docs Engine.
 order: 4
 ---
 
-# Contributing
+Nikala Docs Engine is developed in the open. Contributions are welcome for
+the compiler, CLI, development server, default theme, navigation, build
+pipeline, tests, and documentation site.
 
-Nikala Docs Engine is developed in the open. Before opening a pull request, read the repository [contribution guide](https://github.com/nikala-ui/docs-engine/blob/main/CONTRIBUTING.md).
+Before opening a pull request, read the repository-level
+[contribution guide](https://github.com/nikala-ui/docs-engine/blob/main/CONTRIBUTING.md).
 
-## Local workflow
+## Development setup
+
+The repository uses Bun for development and validation. Clone the repository
+and install its dependencies:
 
 ```bash
+git clone https://github.com/nikala-ui/docs-engine.git
+cd docs-engine
 bun install
+```
+
+The main source areas are:
+
+```text
+src/cli/          CLI entrypoint and commands
+src/core/         content scanning and route construction
+src/mdx/          MDX compilation and syntax highlighting
+src/server/       Vite, development, build, and preview integration
+src/client/       client router and application shell
+src/themes/       default documentation theme
+src/components/   theme UI components
+src/registry/     generated-project source manifests
+tests/            unit and integration tests
+docs/             self-hosted documentation content
+```
+
+## Development commands
+
+Run the test suite:
+
+```bash
 bun test tests
+```
+
+Build the published engine and CLI into `dist/`:
+
+```bash
 bun run build
 ```
 
-Changes to runtime behavior should include a focused test. Changes to the public configuration or CLI should update this documentation site as part of the same pull request.
+Run TypeScript in watch mode while editing engine source:
 
-## Project boundaries
+```bash
+bun run dev
+```
 
-- Keep the engine framework-specific only where the current SolidJS contract requires it.
-- Keep generated consumer sources locally owned and free from runtime dependency on `@nikala-ui/core` or `@nikala-ui/hooks`.
-- Preserve SSR safety: browser APIs must be guarded for non-browser rendering.
-- Preserve SolidJS reactivity: do not destructure reactive props directly.
-- Keep production bundles lazy, especially Shiki language and theme modules.
+Run the self-hosted documentation site:
+
+```bash
+bun run docs:dev
+```
+
+Build and preview the self-hosted production site:
+
+```bash
+bun run docs:build
+bun run docs:preview
+```
+
+The engine build is written to `dist/`. The self-hosted site is written to
+`.docs-dist/`. These are generated outputs and must not be committed.
+
+## What needs tests
+
+Add or update focused tests when changing:
+
+- content scanning, route generation, sidebar ordering, breadcrumbs, or
+  pagination;
+- MDX compilation, frontmatter, heading extraction, or syntax highlighting;
+- CLI initialization and generated project files;
+- public configuration defaults or CLI options;
+- SSR, hydration, client navigation, responsive layout, or browser state;
+- production build and code-splitting behavior.
+
+For a UI change, verify the self-hosted site in both desktop and mobile
+layouts. A successful TypeScript build does not prove that navigation or
+hydration works in a browser.
+
+## Implementation rules
+
+- Consumer-specific hardcoding is strictly forbidden. Use configuration,
+  frontmatter, manifests, or filesystem discovery.
+- Keep handwritten source files below 250 non-empty lines; 150 or fewer is
+  preferred.
+- Keep individual components and functions small, with approximately 80
+  non-empty lines as the practical maximum.
+- Keep one primary responsibility per module and one primary UI component per
+  file.
+- Use `splitProps` for reactive SolidJS props; do not destructure them
+  directly.
+- Guard `window`, `document`, storage, observers, and event listeners for
+  SSR.
+- Do not perform browser-only work during module evaluation.
+- Keep Shiki language and theme modules lazy.
+- Preserve semantic design tokens and existing accessibility behavior.
+- Keep source files in kebab-case and avoid unrelated formatting changes.
+
+## Documentation changes
+
+Update the documentation site in the same pull request when changing public
+behavior. This includes configuration fields, CLI commands, generated files,
+routing behavior, theme APIs, and migration requirements.
+
+When changing a page under `docs/`, run:
+
+```bash
+bun run docs:build
+```
+
+Examples must use the actual CLI and configuration API. Do not document an
+option or command that has not been verified.
 
 ## Pull requests
 
-Use a focused branch and describe the user-visible behavior, tests run, and any migration impact. Keep unrelated formatting or generated output out of the change.
+Use a focused branch and a descriptive commit message. The pull request
+description should explain:
+
+1. The problem and user-visible behavior being changed.
+2. The implementation and any public API changes.
+3. Commands run and their results.
+4. Configuration, generated-file, or migration impact.
+
+Keep unrelated refactors, formatting, local test projects, credentials,
+`node_modules/`, `dist/`, and `.docs-dist/` out of the change.

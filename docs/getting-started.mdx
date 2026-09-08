@@ -1,30 +1,105 @@
 ---
 title: Getting Started
-description: Install Nikala Docs Engine and create your first documentation project.
+description: Install Nikala Docs Engine and create your first documentation site.
 order: 2
 ---
 
-# Getting Started
+Nikala Docs Engine turns an existing SolidJS project into a file-based
+documentation site. Pages are written in MDX, routes are derived from the
+content directory, and the default theme provides navigation, search, syntax
+highlighting, and responsive layouts.
 
-## Install the engine
+## Requirements
 
-Install the package in an existing SolidJS project:
+You need:
 
-```bash
-bun add @nikala-ui/docs
+- Bun, npm, pnpm, or yarn;
+- a SolidJS project, or an empty directory for a new documentation project;
+- Tailwind CSS v4 when using the generated default theme.
+
+The commands below use the package manager selected for your project. The
+engine is not tied to Bun.
+
+## Create a documentation project
+
+Install the engine in an existing project:
+
+<PackageManagerTabs
+  managers={["bun", "pnpm", "npm", "yarn"]}
+  commands={{
+    bun: "bun add @nikala-ui/docs",
+    pnpm: "pnpm add @nikala-ui/docs",
+    npm: "npm install @nikala-ui/docs",
+    yarn: "yarn add @nikala-ui/docs"
+  }}
+/>
+
+Then initialize the documentation structure:
+
+<PackageManagerTabs
+  managers={["bunx", "pnpm", "npx", "yarn"]}
+  commands={{
+    bunx: "bunx @nikala-ui/docs init .",
+    pnpm: "pnpm dlx @nikala-ui/docs init .",
+    npx: "npx @nikala-ui/docs init .",
+    yarn: "yarn dlx @nikala-ui/docs init ."
+  }}
+/>
+
+The initializer creates the documentation structure and installs the
+dependencies required by the generated theme. It merges the generated scripts
+and dependencies into `package.json`, while existing `docs.config.ts` and
+`nikala.config.json` files are preserved.
+
+The generated project contains:
+
+```text
+.
+├── docs/
+│   └── index.mdx
+├── docs.config.ts
+├── nikala.config.json
+├── public/
+│   └── favicon.ico
+└── src/
+    ├── components/ui/
+    ├── hooks/
+    ├── index.css
+    ├── lib/
+    ├── providers/
+    └── themes/default/
 ```
 
-Or scaffold a documentation project directly:
+It also configures the `@/*` TypeScript path alias and adds `dev`, `build`,
+and `preview` scripts when they are not already defined.
 
-```bash
-bunx @nikala-ui/docs init .
-```
+<Callout type="tip">
+  The generated theme sources are regular files in your project. You can
+  inspect and customize them as part of your own documentation site.
+</Callout>
 
-The initializer creates `docs/`, `docs.config.ts`, local UI sources, hooks, providers, and the default theme.
+## Start the development server
 
-## Create a page
+From the project root, run the generated development script:
 
-Add an MDX file under `docs/`:
+<PackageManagerTabs
+  managers={["bun", "pnpm", "npm", "yarn"]}
+  commands={{
+    bun: "bun run dev",
+    pnpm: "pnpm run dev",
+    npm: "npm run dev",
+    yarn: "yarn dev"
+  }}
+/>
+
+The default development server is available at `http://localhost:1862/`.
+
+The server watches the configured content directory and reloads routes and
+configuration changes during development.
+
+## Add your first page
+
+Create an MDX file under `docs/`:
 
 ```mdx
 ---
@@ -35,24 +110,92 @@ order: 1
 
 # Installation
 
-Install the package with your preferred package manager.
+Install the package with your preferred package manager, then start the
+development server.
 ```
 
-The file becomes a route based on its path. Directories automatically become sidebar categories.
+The file path becomes the route. For example:
 
-## Run the site
+```text
+docs/index.mdx              -> /
+docs/installation.mdx       -> /installation
+docs/guides/theming.mdx     -> /guides/theming
+```
+
+Directories become sidebar categories automatically. Use frontmatter such as
+`order`, `categoryOrder`, `icon`, `badge`, `toc`, `prev`, and `next` to control
+page metadata and navigation.
+
+## Configure the site
+
+The initializer creates `docs.config.ts` in the project root. A minimal
+configuration looks like this:
+
+```ts
+import type { DocsConfig } from "@nikala-ui/docs";
+
+const config: DocsConfig = {
+  title: "My Project Docs",
+  description: "Documentation for my project.",
+  contentDir: "docs",
+  favicon: "/favicon.ico",
+  navigation: {
+    layout: "sidebar",
+    sidebar: {
+      header: true,
+      footer: false,
+      headerSubtitle: "Documentation",
+    },
+  },
+  search: {
+    enabled: true,
+    provider: "local",
+  },
+};
+
+export default config;
+```
+
+The full configuration reference is available in [Configuration](/configuration).
+
+## Use Nikala UI with the documentation site
+
+The default theme uses Nikala UI components. When you need additional UI
+components or theme capabilities, use the Nikala UI CLI from the generated
+project:
 
 ```bash
-bunx @nikala-ui/docs dev
+bunx @nikala-ui/cli add button
 ```
 
-Build and preview a production site with:
+The CLI writes the selected source into the project so it can be used and
+customized locally.
 
-```bash
-bunx @nikala-ui/docs build
-bunx @nikala-ui/docs preview
-```
+## Build and preview for production
 
-<Callout type="warning">
-  The generated project owns its copied components and hooks. You can modify them directly without depending on Nikala UI at runtime.
-</Callout>
+Build the site and preview the generated production output:
+
+<PackageManagerTabs
+  managers={["bun", "pnpm", "npm", "yarn"]}
+  commands={{
+    bun: "bun run build",
+    pnpm: "pnpm run build",
+    npm: "npm run build",
+    yarn: "yarn build"
+  }}
+/>
+
+<PackageManagerTabs
+  managers={["bun", "pnpm", "npm", "yarn"]}
+  commands={{
+    bun: "bun run preview",
+    pnpm: "pnpm run preview",
+    npm: "npm run preview",
+    yarn: "yarn preview"
+  }}
+/>
+
+The build writes the documentation site to `dist/`. The preview command
+serves that production output locally. Use the production build before
+deploying to catch SSR, routing, and asset-path issues that may not appear in
+development mode.
