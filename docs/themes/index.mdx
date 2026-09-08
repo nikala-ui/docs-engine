@@ -1,0 +1,36 @@
+---
+title: Themes
+description: Choose a visual direction, configure the default theme, and build a custom documentation theme.
+order: 4
+categoryOrder: 4
+icon: palette
+---
+
+# Themes
+
+Nikala Docs separates theme behavior from theme design.
+
+The engine provides the default documentation layout and navigation theme.
+Your project's CSS owns the visual tokens, colors, typography, and other
+design decisions. This keeps the documentation engine reusable and lets each
+site use its own design system.
+
+## Theme configuration
+
+Use `docs.config.ts` for runtime theme behavior:
+
+```ts
+export default {
+  theme: {
+    defaultMode: "system",
+  },
+};
+```
+
+`defaultMode` accepts `"light"`, `"dark"`, or `"system"`. It is only the
+initial mode. A preference already saved by the visitor takes precedence.
+
+## In this section
+
+- [Colors and CSS](./colors)
+- [Custom themes](./custom-themes)

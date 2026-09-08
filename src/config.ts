@@ -20,8 +20,6 @@ export const DEFAULT_DOCS_CONFIG: Required<Pick<DocsConfig, "title" | "descripti
     },
   },
   theme: {
-    accentColor: "wine",
-    grayColor: "zinc",
     defaultMode: "system",
   },
   shiki: {

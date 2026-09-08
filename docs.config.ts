@@ -34,6 +34,10 @@ const config: DocsConfig = {
       dark: "github-dark",
     },
   },
+  theme: {
+    path: "./src/themes/default",
+    defaultMode: "system",
+  },
 };
 
 export default config;

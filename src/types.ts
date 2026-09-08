@@ -54,8 +54,6 @@ export interface NavItem {
 }
 
 export interface DocsThemeConfig {
-  accentColor?: string;
-  grayColor?: string;
   defaultMode?: "light" | "dark" | "system";
   path?: string;
 }

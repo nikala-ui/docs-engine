@@ -1,0 +1,59 @@
+---
+title: Colors and CSS
+description: Configure design tokens with the Nikala CLI or tweakcn.
+order: 1
+categoryOrder: 4
+icon: paintbrush
+---
+
+# Colors and CSS
+
+Colors are controlled by your project's Tailwind CSS design tokens. Nikala
+Docs does not override those tokens from `docs.config.ts`.
+
+This means the same CSS can be shared by the documentation site and the
+application it documents.
+
+## Generate tokens with Nikala CLI
+
+If the project uses Nikala UI, the CLI can generate the primary accent and
+base gray palette:
+
+```bash
+bunx @nikala-ui/cli theme set amber zinc
+```
+
+The first value selects the primary accent and the second selects the base
+gray palette. The command updates the local Tailwind CSS entrypoint and the
+project's `nikala.config.json` values.
+
+The interactive form is also available:
+
+```bash
+bunx @nikala-ui/cli theme
+```
+
+Run these commands from the project root. They require a project initialized
+with Nikala UI and a local `nikala.config.json`.
+
+## Use tweakcn
+
+[tweakcn](https://tweakcn.com/) can be used to visually edit the same design
+tokens. Export or copy the generated CSS into the CSS entrypoint configured
+for the documentation site:
+
+```ts
+export default {
+  css: "src/index.css",
+};
+```
+
+Keep the generated semantic tokens such as `--primary`, `--background`,
+`--foreground`, and `--muted` in that file. The default docs theme consumes
+these tokens through Tailwind classes.
+
+## Ownership rule
+
+Choose one source of truth for the site's design tokens: the local CSS file.
+The CLI and tweakcn are tools for generating or editing that file; the docs
+engine only consumes the result.

@@ -1,0 +1,58 @@
+---
+title: Custom themes
+description: Replace the default documentation theme with a project-owned theme.
+order: 2
+categoryOrder: 4
+icon: layout-template
+---
+
+# Custom themes
+
+Use a custom theme when the default documentation layout is not enough for
+your project. A custom theme is a local TypeScript module that implements the
+docs theme contract.
+
+## Configure the theme path
+
+Point `theme.path` at the local theme directory or entrypoint:
+
+```ts
+// docs.config.ts
+export default {
+  theme: {
+    path: "./src/themes/custom",
+  },
+};
+```
+
+The theme path is resolved from the project root. Keep the theme in the
+consumer project so its layout and styling remain fully owned by that project.
+
+## Theme contract
+
+A theme exports a contract with a required `name` and `Layout`. Other
+components are optional and can be supplied when the theme needs to replace
+the default navbar, sidebar, table of contents, breadcrumbs, pager, or search
+dialog:
+
+```tsx
+import type { DocsThemeContract } from "@nikala-ui/docs/theme";
+import { CustomLayout } from "./layout";
+
+const customTheme: DocsThemeContract = {
+  name: "custom",
+  Layout: CustomLayout,
+};
+
+export default customTheme;
+```
+
+The layout receives the resolved site configuration, navigation tree, current
+page, table-of-contents data, and previous/next page links. Use those values
+instead of coupling the theme to a specific documentation site's content.
+
+## Keep runtime behavior separate
+
+Use `docs.config.ts` for site configuration such as title, navigation, and
+the default color mode. Use the theme module for layout and component
+composition. Keep colors and design tokens in the project's CSS entrypoint.

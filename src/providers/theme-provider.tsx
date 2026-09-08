@@ -8,9 +8,14 @@ import {
   type ParentComponent,
   type Accessor,
 } from "solid-js";
+import {
+  getAccentCssVariables,
+  isDocsAccentColor,
+  type DocsAccentColor,
+} from "../theme-accent.js";
 
 export type Theme = "light" | "dark" | "system";
-export type AccentColor = "yellow" | "red" | "violet" | "sky" | "emerald" | "zinc";
+export type AccentColor = DocsAccentColor;
 export type Radius = "0" | "0.3" | "0.5" | "0.75" | "1.0";
 
 export interface ThemeProviderProps {
@@ -23,18 +28,6 @@ export interface ThemeProviderProps {
   /** Key used to store theme preferences in localStorage */
   storageKey?: string;
 }
-
-const ACCENT_COLORS: Record<
-  AccentColor,
-  { light: string; dark: string; lightFg: string; darkFg: string }
-> = {
-  yellow: { light: "oklch(0.795 0.184 86.047)", dark: "oklch(0.852 0.199 91.936)", lightFg: "oklch(0.145 0 0)", darkFg: "oklch(0.145 0 0)" },
-  red: { light: "oklch(0.577 0.245 27.325)", dark: "oklch(0.637 0.237 25.331)", lightFg: "oklch(0.985 0 0)", darkFg: "oklch(0.985 0 0)" },
-  violet: { light: "oklch(0.541 0.281 293.009)", dark: "oklch(0.606 0.25 292.717)", lightFg: "oklch(0.985 0 0)", darkFg: "oklch(0.985 0 0)" },
-  sky: { light: "oklch(0.588 0.158 241.966)", dark: "oklch(0.672 0.154 238.29)", lightFg: "oklch(0.985 0 0)", darkFg: "oklch(0.145 0 0)" },
-  emerald: { light: "oklch(0.596 0.145 163.225)", dark: "oklch(0.696 0.17 162.48)", lightFg: "oklch(0.985 0 0)", darkFg: "oklch(0.145 0 0)" },
-  zinc: { light: "oklch(0.205 0 0)", dark: "oklch(0.985 0 0)", lightFg: "oklch(0.985 0 0)", darkFg: "oklch(0.205 0 0)" },
-};
 
 interface ThemeProviderContextValue {
   theme: Accessor<Theme>;
@@ -68,7 +61,7 @@ export const ThemeProvider: ParentComponent<ThemeProviderProps> = (props) => {
     if (typeof window === "undefined") return props.defaultAccent;
     try {
       const saved = localStorage.getItem(`${storageKey}-accent`);
-      if (saved && ACCENT_COLORS[saved as AccentColor]) return saved as AccentColor;
+      if (isDocsAccentColor(saved)) return saved;
     } catch { }
     return props.defaultAccent;
   };
@@ -108,13 +101,10 @@ export const ThemeProvider: ParentComponent<ThemeProviderProps> = (props) => {
     root.style.colorScheme = resolvedDark ? "dark" : "light";
 
     // Override --primary CSS variables ONLY if explicitly chosen
-    if (currentAccent && ACCENT_COLORS[currentAccent]) {
-      const accentData = ACCENT_COLORS[currentAccent];
-      const primaryHex = resolvedDark ? accentData.dark : accentData.light;
-      const primaryFgHex = resolvedDark ? accentData.darkFg : accentData.lightFg;
-
-      root.style.setProperty("--primary", primaryHex);
-      root.style.setProperty("--primary-foreground", primaryFgHex);
+    if (currentAccent && isDocsAccentColor(currentAccent)) {
+      const accentTokens = getAccentCssVariables(currentAccent, resolvedDark);
+      root.style.setProperty("--primary", accentTokens.primary);
+      root.style.setProperty("--primary-foreground", accentTokens.foreground);
     } else {
       root.style.removeProperty("--primary");
       root.style.removeProperty("--primary-foreground");
@@ -160,13 +150,10 @@ export const ThemeProvider: ParentComponent<ThemeProviderProps> = (props) => {
         root.style.colorScheme = e.matches ? "dark" : "light";
 
         const currentAccent = accent();
-        if (currentAccent && ACCENT_COLORS[currentAccent]) {
-          const accentData = ACCENT_COLORS[currentAccent];
-          const primaryHex = e.matches ? accentData.dark : accentData.light;
-          const primaryFgHex = e.matches ? accentData.darkFg : accentData.lightFg;
-
-          root.style.setProperty("--primary", primaryHex);
-          root.style.setProperty("--primary-foreground", primaryFgHex);
+        if (currentAccent && isDocsAccentColor(currentAccent)) {
+          const accentTokens = getAccentCssVariables(currentAccent, e.matches);
+          root.style.setProperty("--primary", accentTokens.primary);
+          root.style.setProperty("--primary-foreground", accentTokens.foreground);
         }
       }
     };
