@@ -82,6 +82,19 @@ export interface DocsHomeConfig {
   showPager?: boolean;
 }
 
+export interface DocsAiProvider {
+  name: string;
+  url: string;
+  /** Optional prompt template. Supports {url}, {content}, and {title}. */
+  prompt?: string;
+}
+
+export interface DocsPageActionsConfig {
+  copyPage?: boolean;
+  copyMarkdown?: boolean;
+  ai?: DocsAiProvider[];
+}
+
 export interface ShikiConfig {
   themes?: {
     light?: string;
@@ -110,6 +123,7 @@ export interface DocsConfig {
     branch?: string;
     rootDir?: string;
   };
+  pageActions?: DocsPageActionsConfig;
   nav?: NavItem[];
   sidebar?: SidebarItem[] | "auto";
   navigation?: DocsNavigationConfig;

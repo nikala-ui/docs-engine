@@ -1,5 +1,5 @@
 // packages/docs/src/themes/default/layout.tsx
-import { createSignal, Show, splitProps, type ParentComponent } from "solid-js";
+import { createSignal, For, Show, splitProps, type ParentComponent } from "solid-js";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { SidebarInset } from "@/components/ui/sidebar";
 import { Container } from "@/components/ui/container";
@@ -13,6 +13,16 @@ import { DocsMobileTableOfContents } from "./navigation/mobile-table-of-contents
 import { DocsSearchDialog } from "./overlays/search-dialog.jsx";
 import { cn } from "@/lib/cn";
 import { buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { createClipboard } from "@/hooks/create-clipboard";
+import { Copy, FileText, ChevronDown, ExternalLink } from "lucide-solid";
+import { pageToMarkdown, pageToText, resolvePageActionUrl, sourceToMarkdown } from "../../client/page-actions.js";
 import { getRepositorySourceUrl } from "../../navigation/repository-links.js";
 import type { DocsLayoutProps } from "../types.js";
 
@@ -25,11 +35,13 @@ export const DocsLayout: ParentComponent<DocsLayoutProps> = (props) => {
     "toc",
     "prev",
     "next",
+    "sourceContent",
     "children",
     "class",
   ]);
 
   const [searchOpen, setSearchOpen] = createSignal(false);
+  const pageClipboard = createClipboard();
 
   const currentUrl = () => local.currentPage?.url;
   const landingPage = () =>
@@ -52,6 +64,31 @@ export const DocsLayout: ParentComponent<DocsLayoutProps> = (props) => {
     if (!page?.sourcePath || !repository) return undefined;
     return getRepositorySourceUrl(repository, page.sourcePath, local.config.contentDir || "docs");
   };
+
+  const pageElement = () => typeof document !== "undefined"
+    ? document.querySelector("main article [data-docs-page-content]") as HTMLElement | null
+    : null;
+  const markdown = () => local.sourceContent
+    ? sourceToMarkdown(local.sourceContent)
+    : pageElement() ? pageToMarkdown(pageElement()!) : "";
+  const copyPage = async () => {
+    const page = pageElement();
+    if (page) await pageClipboard.copy(pageToText(page));
+  };
+  const copyMarkdown = async () => {
+    const content = markdown();
+    if (content) await pageClipboard.copy(content);
+  };
+  const aiProviders = () => local.config.pageActions?.ai || [];
+  const copyPageEnabled = () => local.config.pageActions?.copyPage !== false;
+  const copyMarkdownEnabled = () => local.config.pageActions?.copyMarkdown !== false;
+  const hasPageActions = () => copyPageEnabled() || copyMarkdownEnabled() || aiProviders().length > 0;
+  const pageActionUrl = (provider: { url: string; prompt?: string }) => resolvePageActionUrl(provider.url, {
+    url: typeof window !== "undefined" ? window.location.href : "",
+    content: markdown(),
+    title: local.currentPage?.title,
+    prompt: provider.prompt,
+  });
 
   const sidebar = (className?: string) => (
     <DocsSidebar
@@ -82,25 +119,66 @@ export const DocsLayout: ParentComponent<DocsLayoutProps> = (props) => {
               description={local.currentPage?.description}
               class="mb-8"
               actions={
-                <Show when={sourceUrl()}>
-                  {(url) => (
-                    <a
-                      href={url()}
-                      target="_blank"
-                      rel="noreferrer"
-                      class={cn(buttonVariants({ variant: "secondary", size: "sm" }), "shrink-0")}
-                    >
-                      View source
-                    </a>
-                  )}
-                </Show>
+                <div class="flex items-center gap-2">
+                  <Show when={sourceUrl()}>
+                    {(url) => (
+                      <a
+                        href={url()}
+                        target="_blank"
+                        rel="noreferrer"
+                        class={cn(buttonVariants({ variant: "secondary", size: "sm" }), "shrink-0")}
+                      >
+                        View source
+                      </a>
+                    )}
+                  </Show>
+                  <Show when={hasPageActions()}>
+                    <DropdownMenu placement="bottom-end">
+                      <DropdownMenuTrigger
+                        as={Button}
+                        variant="secondary"
+                        size="sm"
+                        class="shrink-0 gap-1"
+                        aria-label="Copy documentation page"
+                      >
+                        <Copy class="size-3.5" />
+                        <span class="hidden sm:inline">Copy page</span>
+                        <ChevronDown class="size-3.5" />
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent>
+                        <Show when={copyPageEnabled()}>
+                          <DropdownMenuItem onClick={copyPage}>
+                            <FileText class="mr-2 size-4" />
+                            Copy page
+                          </DropdownMenuItem>
+                        </Show>
+                        <Show when={copyMarkdownEnabled()}>
+                          <DropdownMenuItem onClick={copyMarkdown}>
+                            <Copy class="mr-2 size-4" />
+                            Copy as Markdown
+                          </DropdownMenuItem>
+                        </Show>
+                        <Show when={aiProviders().length > 0}>
+                          <For each={aiProviders()}>
+                            {(provider) => (
+                              <DropdownMenuItem as="a" href={pageActionUrl(provider)} target="_blank" rel="noreferrer">
+                                <ExternalLink class="mr-2 size-4" />
+                                Open in {provider.name}
+                              </DropdownMenuItem>
+                            )}
+                          </For>
+                        </Show>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </Show>
+                </div>
               }
             />
           </Show>
           <Show when={showToc()}>
             <DocsMobileTableOfContents items={local.toc!} class="mb-6" />
           </Show>
-          <Container as="div" size="full" class="prose prose-zinc dark:prose-invert max-w-none px-0 sm:px-0 lg:px-0">
+          <Container as="div" size="full" class="prose prose-zinc dark:prose-invert max-w-none px-0 sm:px-0 lg:px-0" data-docs-page-content>
             {local.children}
           </Container>
           <Show when={local.prev || local.next}>
@@ -126,7 +204,7 @@ export const DocsLayout: ParentComponent<DocsLayoutProps> = (props) => {
               <DocsBreadcrumbs items={local.breadcrumbs!} class="mb-6" />
             </Show>
           </Show>
-          <Container as="div" size="full" class="prose prose-zinc dark:prose-invert max-w-none px-0">
+          <Container as="div" size="full" class="prose prose-zinc dark:prose-invert max-w-none px-0" data-docs-page-content>
             {local.children}
           </Container>
           <Show when={local.config.home?.showPager === true && (local.prev || local.next)}>

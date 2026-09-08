@@ -6,6 +6,8 @@ export interface PageModule {
 
 export type PageLoader = () => Promise<PageModule>;
 export type PageRouteLoaders = Record<string, PageLoader>;
+export type PageSourceLoader = () => Promise<{ default: string }>;
+export type PageSourceLoaders = Record<string, PageSourceLoader>;
 
 export interface AppProps {
   initialPath?: string;

@@ -60,6 +60,7 @@ export interface DocsLayoutProps {
   toc?: TocItem[];
   prev?: { title: string; href: string };
   next?: { title: string; href: string };
+  sourceContent?: string;
   children?: JSX.Element;
   class?: string;
 }

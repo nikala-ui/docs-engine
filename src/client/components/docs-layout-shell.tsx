@@ -15,6 +15,7 @@ interface DocsLayoutShellProps {
   toc: TocItem[];
   prev: { title: string; href: string } | undefined;
   next: { title: string; href: string } | undefined;
+  sourceContent?: string;
 }
 
 export const DocsLayoutShell: ParentComponent<DocsLayoutShellProps> = (props) => {
@@ -22,7 +23,7 @@ export const DocsLayoutShell: ParentComponent<DocsLayoutShellProps> = (props) =>
   if (!ThemeProvider) throw new Error("Nikala Docs theme must provide a ThemeProvider");
   return (
     <ThemeProvider defaultTheme={resolveDefaultThemeMode(props.config)} storageKey="nikala-theme">
-      <configuredTheme.Layout config={props.config} tree={props.tree} currentPage={props.currentPage} breadcrumbs={props.breadcrumbs} toc={props.toc} prev={props.prev} next={props.next}>
+      <configuredTheme.Layout config={props.config} tree={props.tree} currentPage={props.currentPage} breadcrumbs={props.breadcrumbs} toc={props.toc} prev={props.prev} next={props.next} sourceContent={props.sourceContent}>
         {props.children}
       </configuredTheme.Layout>
     </ThemeProvider>

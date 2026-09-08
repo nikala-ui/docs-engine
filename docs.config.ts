@@ -10,6 +10,25 @@ const config: DocsConfig = {
     branch: "main",
     rootDir: "",
   },
+  pageActions: {
+    ai: [
+      {
+        name: "ChatGPT",
+        url: "https://chatgpt.com/?q={prompt}",
+        prompt: "You are my documentation companion. I’m reading ‘{title}’ at {url}. Teach me how to use this page in a practical way: explain the core idea, show an idiomatic example, point out common mistakes, and help debug problems using the documented APIs and conventions.",
+      },
+      {
+        name: "Claude",
+        url: "https://claude.ai/new?q={prompt}",
+        prompt: "You are my documentation companion. I’m reading ‘{title}’ at {url}. Teach me how to use this page in a practical way: explain the core idea, show an idiomatic example, point out common mistakes, and help debug problems using the documented APIs and conventions.",
+      },
+      {
+        name: "v0",
+        url: "https://v0.dev/chat?q={prompt}",
+        prompt: "You are my documentation companion. I’m reading ‘{title}’ at {url}. Teach me how to use this page in a practical way: explain the core idea, show an idiomatic example, point out common mistakes, and help debug problems using the documented APIs and conventions.",
+      },
+    ],
+  },
   nav: [
     { title: "Home", href: "/" },
     { title: "Getting Started", href: "/getting-started" },

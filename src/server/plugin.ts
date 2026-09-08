@@ -26,6 +26,9 @@ const RESOLVED_TREE_ID = "\0" + VIRTUAL_TREE_ID;
 const VIRTUAL_ROUTES_ID = "virtual:nikala-docs-routes";
 const RESOLVED_ROUTES_ID = "\0" + VIRTUAL_ROUTES_ID;
 
+const VIRTUAL_SOURCES_ID = "virtual:nikala-docs-sources";
+const RESOLVED_SOURCES_ID = "\0" + VIRTUAL_SOURCES_ID;
+
 const VIRTUAL_COMPONENTS_ID = "virtual:nikala-docs-components";
 const RESOLVED_COMPONENTS_ID = "\0" + VIRTUAL_COMPONENTS_ID;
 
@@ -231,6 +234,7 @@ export function nikalaDocsPlugin(options: NikalaDocsPluginOptions = {}): Plugin 
       if (id === VIRTUAL_CONFIG_ID) return RESOLVED_CONFIG_ID;
       if (id === VIRTUAL_TREE_ID) return RESOLVED_TREE_ID;
       if (id === VIRTUAL_ROUTES_ID) return RESOLVED_ROUTES_ID;
+      if (id === VIRTUAL_SOURCES_ID) return RESOLVED_SOURCES_ID;
       if (id === VIRTUAL_COMPONENTS_ID) return RESOLVED_COMPONENTS_ID;
       if (id === VIRTUAL_ICONS_ID || id === RESOLVED_ICONS_ID) return RESOLVED_ICONS_ID;
       if (id === VIRTUAL_THEME_ID) return RESOLVED_THEME_ID;
@@ -296,6 +300,20 @@ export const routes = {
 ${routeEntries.join(",\n")}
 };
 export default routes;
+`;
+      }
+
+      if (id === RESOLVED_SOURCES_ID) {
+        cachedPages = await scanContent(docsDir);
+        const sourceEntries = cachedPages.map((page) =>
+          `  ${JSON.stringify(page.url)}: () => import(${JSON.stringify(`${page.filePath}?raw`)})`
+        );
+
+        return `
+export const sources = {
+${sourceEntries.join(",\n")}
+};
+export default sources;
 `;
       }
 
