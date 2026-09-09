@@ -5,7 +5,7 @@ import fs from "fs-extra";
 import type { DocsConfig } from "./types.js";
 
 export const DEFAULT_DOCS_CONFIG: Required<Pick<DocsConfig, "title" | "description" | "contentDir">> & DocsConfig = {
-  title: "Nikala Docs",
+  title: "Folio",
   description: "Documentation built with Nikala UI",
   favicon: "/favicon.ico",
   contentDir: "docs",
@@ -101,7 +101,7 @@ export async function resolveDocsConfig(cwd: string = process.cwd()): Promise<Do
           },
         };
       } catch (error) {
-        console.warn(`[nikala-docs] Failed to load config from ${filename}:`, error);
+        console.warn(`[folio] Failed to load config from ${filename}:`, error);
       }
     }
   }

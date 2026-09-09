@@ -5,7 +5,7 @@ import { defaultMdxComponents } from "../components/mdx-components.jsx";
 import "./style.css";
 
 // @ts-ignore
-import { routes as pageRoutes } from "virtual:nikala-docs-routes";
+import { routes as pageRoutes } from "virtual:folio-routes";
 
 if (typeof document !== "undefined") {
   const root = document.getElementById("root");

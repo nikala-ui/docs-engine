@@ -1,11 +1,11 @@
-# AGENTS.md — Nikala Docs Engine
+# AGENTS.md — Folio
 
 These instructions apply to all code, documentation, tests, and tooling in
 this repository.
 
 ## Project purpose
 
-Nikala Docs Engine is a configurable documentation system for SolidJS
+Folio is a configurable documentation system for SolidJS
 projects. It turns MDX content into searchable, server-rendered and
 client-navigable documentation sites.
 

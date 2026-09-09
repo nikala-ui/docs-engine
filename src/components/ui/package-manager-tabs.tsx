@@ -20,7 +20,7 @@ export interface PackageManagerTabsProps
   extends Omit<JSX.HTMLAttributes<HTMLDivElement>, "onChange"> {
   /** List of package managers to show in the switcher tabs */
   managers?: string[];
-  /** Single CLI command template (e.g. "add @nikala-ui/core", "create @nikala-ui/docs my-app") */
+  /** Single CLI command template (e.g. "add @nikala-ui/core", "create @nikala-ui/folio my-app") */
   command?: string;
   /** Explicit map of custom commands per manager (e.g. { bun: "bun add foo", npm: "npm i foo" }) */
   commands?: Record<string, string>;

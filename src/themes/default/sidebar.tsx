@@ -17,7 +17,7 @@ import { SidebarTree } from "./navigation/sidebar-tree.jsx";
 
 export const DocsSidebar: Component<DocsSidebarProps> = (props) => {
   const [local, rest] = splitProps(props, ["tree", "nav", "currentUrl", "title", "logo", "headerSubtitle", "footerText", "showHeader", "showFooter", "class"]);
-  const brandText = () => local.logo?.text || local.title || "Nikala Docs";
+  const brandText = () => local.logo?.text || local.title || "Folio";
   const sidebar = useSidebar();
   const [sidebarElement, setSidebarElement] = createSignal<HTMLDivElement>();
 

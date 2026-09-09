@@ -3,7 +3,7 @@ import { App } from "./app";
 import { defaultMdxComponents } from "../components/mdx-components.jsx";
 
 // @ts-ignore
-import { routes as pageRoutes } from "virtual:nikala-docs-routes";
+import { routes as pageRoutes } from "virtual:folio-routes";
 
 export async function render(url: string): Promise<string> {
   const normalized = url.replace(/\/$/, "") || "/";

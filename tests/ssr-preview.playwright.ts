@@ -9,7 +9,7 @@ const fixtureRoot = path.resolve(process.env.NIKALA_DOCS_FIXTURE || packageRoot)
 const outputDir = process.env.NIKALA_DOCS_OUTPUT || ".docs-dist";
 const port = Number(process.env.NIKALA_DOCS_TEST_PORT || 4183);
 const baseUrl = `http://localhost:${port}`;
-const homeText = process.env.NIKALA_DOCS_HOME_TEXT || "Nikala Docs Engine";
+const homeText = process.env.NIKALA_DOCS_HOME_TEXT || "Folio";
 const pageRoute = process.env.NIKALA_DOCS_PAGE_ROUTE || "/getting-started";
 const pageText = process.env.NIKALA_DOCS_PAGE_TEXT || "Getting Started";
 

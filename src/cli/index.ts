@@ -9,7 +9,7 @@ import { runServeCommand } from "./commands/serve.js";
 const program = new Command();
 
 program
-  .name("@nikala-ui/docs")
+  .name("@nikala-ui/folio")
   .description("Zero-config, fast, and elegant documentation engine for SolidJS")
   .version("0.12.2");
 
@@ -53,7 +53,7 @@ program
 
 program
   .command("init [dir]")
-  .description("Scaffold a new Nikala Docs project with sample content")
+  .description("Scaffold a new Folio project with sample content")
   .action((dir) => {
     runInitCommand(dir);
   });

@@ -128,7 +128,7 @@ export async function ensureLanguage(highlighter: Highlighter, rawLang: string):
       await highlighter.loadLanguage(normalized as keyof typeof languageLoaders);
       return normalized;
     } catch (err) {
-      console.warn(`[nikala-docs] Failed to dynamically load Shiki language "${normalized}":`, err);
+      console.warn(`[folio] Failed to dynamically load Shiki language "${normalized}":`, err);
     }
   }
 
@@ -149,7 +149,7 @@ export async function ensureTheme(highlighter: Highlighter, themeName: string): 
       await highlighter.loadTheme(themeName as keyof typeof themeLoaders);
       return themeName;
     } catch (err) {
-      console.warn(`[nikala-docs] Failed to dynamically load Shiki theme "${themeName}":`, err);
+      console.warn(`[folio] Failed to dynamically load Shiki theme "${themeName}":`, err);
     }
   }
 
@@ -161,7 +161,7 @@ export async function ensureTheme(highlighter: Highlighter, themeName: string): 
     await highlighter.loadTheme(module.default || module);
     return themeName;
   } catch (err) {
-    console.warn(`[nikala-docs] Failed to dynamically load Shiki theme "${themeName}":`, err);
+    console.warn(`[folio] Failed to dynamically load Shiki theme "${themeName}":`, err);
   }
 
   return DEFAULT_DARK_THEME;

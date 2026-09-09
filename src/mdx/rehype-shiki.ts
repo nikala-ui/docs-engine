@@ -85,7 +85,7 @@ export function rehypeShiki(config?: ShikiConfig) {
                 }
               } catch (err) {
                 // Fallback to unhighlighted code on error
-                console.warn(`[nikala-docs] Shiki highlighting failed for lang: ${rawLang}`, err);
+                console.warn(`[folio] Shiki highlighting failed for lang: ${rawLang}`, err);
               }
             })()
           );

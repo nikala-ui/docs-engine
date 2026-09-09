@@ -15,7 +15,7 @@ const srcComponentsDir = path.resolve(rootDir, "src/components");
 const srcHooksDir = path.resolve(rootDir, "src/hooks");
 const srcProvidersDir = path.resolve(rootDir, "src/providers");
 const srcLibDir = path.resolve(rootDir, "src/lib");
-console.log(pc.cyan("📦 Building @nikala-ui/docs..."));
+console.log(pc.cyan("📦 Building @nikala-ui/folio..."));
 
 // TypeScript does not remove files left behind by renames. Clean generated
 // output first so stale casing variants (for example App.d.ts/app.d.ts) cannot
@@ -72,7 +72,7 @@ try {
 // must remain usable after extraction from this monorepo.
 try {
   if (!fs.existsSync(srcRegistryDir) || !fs.existsSync(srcComponentsDir) || !fs.existsSync(srcHooksDir) || !fs.existsSync(srcProvidersDir)) {
-    throw new Error("Nikala Docs local registry or source snapshots are missing");
+    throw new Error("Folio local registry or source snapshots are missing");
   }
   await fs.remove(path.join(distDir, "registry"));
   await fs.remove(path.join(distDir, "vendor"));
@@ -99,4 +99,4 @@ try {
   process.exit(1);
 }
 
-console.log(pc.green("✨ @nikala-ui/docs build complete!"));
+console.log(pc.green("✨ @nikala-ui/folio build complete!"));

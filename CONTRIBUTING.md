@@ -1,6 +1,6 @@
-# Contributing to Nikala Docs Engine
+# Contributing to Folio
 
-Thanks for contributing. Nikala Docs Engine is a public package, so changes should be reviewable, tested, and documented.
+Thanks for contributing. Folio is a public package, so changes should be reviewable, tested, and documented.
 
 ## Development setup
 
@@ -13,8 +13,8 @@ Requirements:
 Clone the repository and install dependencies:
 
 ```bash
-git clone https://github.com/nikala-ui/docs-engine.git
-cd docs-engine
+git clone https://github.com/nikala-ui/folio.git
+cd folio
 bun install
 ```
 

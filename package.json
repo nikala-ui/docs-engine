@@ -1,13 +1,12 @@
 {
-  "name": "@nikala-ui/docs",
+  "name": "@nikala-ui/folio",
   "version": "0.12.2",
   "description": "Zero-config, fast, and elegant documentation engine for SolidJS, built on Nikala UI and Tailwind CSS v4",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "bin": {
-    "@nikala-ui/docs": "./dist/cli/index.js",
-    "nikala-docs": "./dist/cli/index.js"
+    "folio": "./dist/cli/index.js"
   },
   "exports": {
     ".": {
@@ -39,7 +38,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/nikala-ui/docs-engine.git"
+    "url": "git+https://github.com/nikala-ui/folio.git"
   },
   "scripts": {
     "typecheck": "bunx tsc --noEmit -p tsconfig.json",

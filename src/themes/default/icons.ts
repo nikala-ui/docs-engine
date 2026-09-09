@@ -1,4 +1,4 @@
-import { icons } from "virtual:nikala-docs-icons";
+import { icons } from "virtual:folio-icons";
 import type { DocsIcon } from "../../types.js";
 
 function toComponentName(name: string): string {
