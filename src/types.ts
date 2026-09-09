@@ -136,9 +136,7 @@ export interface DocsConfig {
   shiki?: ShikiConfig;
   search?: {
     enabled?: boolean;
-    /** Provider name supplied by the selected search adapter. */
-    provider?: string;
-    /** Optional external adapter implementing the search contract. */
-    adapter?: import("./search/provider.js").SearchAdapter;
+    /** A provider name or a configured adapter instance. */
+    provider?: string | import("./search/provider.js").SearchAdapter;
   };
 }

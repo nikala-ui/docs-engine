@@ -42,7 +42,7 @@ describe("docs config", () => {
       name: "custom",
       search: async ({ pages }: { pages: typeof pages; query: string }) => pages.slice(0, 1),
     };
-    const resolved = resolveSearchProvider({ provider: "custom", adapter });
+    const resolved = resolveSearchProvider({ provider: adapter });
 
     expect(resolved.active).toBe("custom");
     expect(resolved.fallback).toBe(false);

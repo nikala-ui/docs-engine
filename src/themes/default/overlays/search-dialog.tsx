@@ -38,9 +38,7 @@ export const DocsSearchDialog: Component<DocsSearchDialogProps> = (props) => {
     >
       {({ search }) => {
         const query = () => search().trim();
-        const resolvedProvider = () => props.adapter
-          ? { requested: props.provider, active: props.adapter.name, fallback: false, implementation: props.adapter }
-          : resolveSearchProvider({ provider: props.provider });
+        const resolvedProvider = () => resolveSearchProvider({ provider: props.provider });
         const [filteredPages, setFilteredPages] = createSignal(props.pages || []);
         const [searching, setSearching] = createSignal(false);
         let requestId = 0;

@@ -15,7 +15,7 @@ export interface SearchAdapter {
 export type ConfiguredSearchProvider = NonNullable<DocsConfig["search"]>["provider"];
 
 export interface ResolvedSearchProvider {
-  requested: ConfiguredSearchProvider;
+  requested: string;
   active: string;
   fallback: boolean;
   implementation: SearchAdapter;
@@ -41,17 +41,18 @@ export const localSearchAdapter: SearchAdapter = {
  * the configuration contract or leaving the search dialog non-functional.
  */
 export function resolveSearchProvider(search?: DocsConfig["search"]): ResolvedSearchProvider {
-  const requested = search?.provider?.trim() || LOCAL_SEARCH_PROVIDER;
-  const configuredAdapter = search?.adapter;
+  const configuredProvider = search?.provider;
 
-  if (configuredAdapter) {
+  if (configuredProvider && typeof configuredProvider !== "string") {
     return {
-      requested,
-      active: configuredAdapter.name,
-      fallback: configuredAdapter.name !== requested,
-      implementation: configuredAdapter,
+      requested: configuredProvider.name,
+      active: configuredProvider.name,
+      fallback: false,
+      implementation: configuredProvider,
     };
   }
+
+  const requested = configuredProvider?.trim() || LOCAL_SEARCH_PROVIDER;
 
   return {
     requested,

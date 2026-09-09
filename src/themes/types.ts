@@ -51,8 +51,7 @@ export interface DocsSearchDialogProps {
   onOpenChange: (open: boolean) => void;
   pages?: PageData[];
   onSelectPage?: (url: string) => void;
-  provider?: string;
-  adapter?: SearchAdapter;
+  provider?: string | SearchAdapter;
 }
 
 export interface DocsLayoutProps {
