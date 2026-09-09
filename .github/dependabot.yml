@@ -1,0 +1,12 @@
+version: 2
+updates:
+  # Dependabot identifies the npm-compatible package manifest; contributors
+  # can continue using Bun and the committed bun.lock file locally.
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    labels:
+      - dependencies
+      - automated

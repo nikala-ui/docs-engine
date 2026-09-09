@@ -202,11 +202,17 @@ bun install
 Useful repository commands:
 
 ```bash
-bun test tests       # Run tests
+bun run typecheck    # Run the strict TypeScript check
+bun run test         # Run unit and integration tests
+bunx playwright install chromium # Install the local browser test runtime
+bun run test:browser # Run browser, SSR, and hydration smoke tests
+bun run test:generated # Test a clean generated consumer project
+bun run package:check  # Validate the publishable package artifact
+bun run bundle:check   # Report and validate production bundle sizes
 bun run build        # Build the engine and CLI into dist/
-bun run dev          # TypeScript watch mode
-bun run docs:dev     # Run the self-hosted docs site
 bun run docs:build   # Build the self-hosted site into .docs-dist/
+bun run check        # Run the complete local quality contract
+bun run docs:dev     # Run the self-hosted docs site
 bun run docs:preview # Preview the self-hosted production site
 ```
 

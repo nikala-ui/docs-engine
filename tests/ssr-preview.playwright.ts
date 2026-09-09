@@ -1,25 +1,23 @@
 import assert from "node:assert/strict";
 import path from "node:path";
-import { fileURLToPath, pathToFileURL } from "node:url";
+import { fileURLToPath } from "node:url";
 import { spawn } from "node:child_process";
+import { chromium, type Page } from "playwright";
 
 const packageRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const repoRoot = path.resolve(packageRoot, "../..");
-const fixtureRoot = process.env.NIKALA_DOCS_FIXTURE;
-const port = process.env.NIKALA_DOCS_TEST_PORT || "4183";
+const fixtureRoot = path.resolve(process.env.NIKALA_DOCS_FIXTURE || packageRoot);
+const outputDir = process.env.NIKALA_DOCS_OUTPUT || ".docs-dist";
+const port = Number(process.env.NIKALA_DOCS_TEST_PORT || 4183);
+const baseUrl = `http://localhost:${port}`;
+const homeText = process.env.NIKALA_DOCS_HOME_TEXT || "Nikala Docs Engine";
+const pageRoute = process.env.NIKALA_DOCS_PAGE_ROUTE || "/getting-started";
+const pageText = process.env.NIKALA_DOCS_PAGE_TEXT || "Getting Started";
 
-if (!fixtureRoot) {
-  throw new Error("NIKALA_DOCS_FIXTURE must point to a built documentation project");
-}
-
-const playwright = await import(
-  pathToFileURL(path.join(repoRoot, "node_modules/.bun/playwright@1.62.1/node_modules/playwright/index.mjs")).href
-);
-const browser = await playwright.chromium.launch({ headless: true });
+const browser = await chromium.launch({ headless: true });
 const server = spawn(
-  "bun",
-  [path.join(packageRoot, "dist/cli/index.js"), "preview", "--port", port],
-  { cwd: fixtureRoot, stdio: ["ignore", "pipe", "pipe"] }
+  process.execPath,
+  [path.join(packageRoot, "dist/cli/index.js"), "preview", "--port", String(port), "--outDir", outputDir],
+  { cwd: fixtureRoot, stdio: ["ignore", "pipe", "pipe"] },
 );
 
 let serverOutput = "";
@@ -27,59 +25,78 @@ server.stdout.on("data", (chunk) => { serverOutput += String(chunk); });
 server.stderr.on("data", (chunk) => { serverOutput += String(chunk); });
 
 try {
-  await new Promise<void>((resolve, reject) => {
-    const timeout = setTimeout(() => reject(new Error(`Preview did not start:\n${serverOutput}`)), 15_000);
-    const onData = () => {
-      if (serverOutput.includes(`http://localhost:${port}/`)) {
-        clearTimeout(timeout);
-        resolve();
-      }
-    };
-    server.stdout.on("data", onData);
-    server.stderr.on("data", onData);
-    server.once("exit", (code) => reject(new Error(`Preview exited with ${code}:\n${serverOutput}`)));
-  });
+  await waitForServer();
+
+  const response = await fetch(`${baseUrl}/`);
+  assert.equal(response.ok, true, `SSR request failed with ${response.status}`);
+  const html = await response.text();
+  assert.match(html, new RegExp(escapeRegExp(homeText)), "SSR HTML must contain the home page content");
 
   const page = await browser.newPage();
   const pageErrors: string[] = [];
-  page.on("pageerror", (error: { message: string; stack?: string }) => pageErrors.push(error.stack || error.message));
-  page.on("console", (message: { type: () => string; text: () => string }) => {
+  page.on("pageerror", (error) => pageErrors.push(error.stack || error.message));
+  page.on("console", (message) => {
     if (message.type() === "error") pageErrors.push(message.text());
   });
 
-  const baseUrl = `http://localhost:${port}`;
   await page.goto(`${baseUrl}/`, { waitUntil: "networkidle" });
-  await assertText(page, "Introduction");
-  await assertText(page, "What is Nikala UI?");
+  await assertText(page, homeText);
+  await assertTitle(page, homeText);
 
-  await page.getByRole("link", { name: "CLI Reference" }).first().click();
-  await page.waitForURL(/\/cli\/?$/);
-  await assertText(page, "CLI Reference");
+  await page.locator("a:visible").filter({ hasText: pageText }).first().click();
+  await page.waitForURL(new RegExp(`${escapeRegExp(pageRoute)}/?$`));
+  await assertText(page, pageText);
+  await assertTitle(page, pageText);
   await page.reload({ waitUntil: "networkidle" });
-  await assertText(page, "CLI Reference");
+  await assertText(page, pageText);
 
   const mobilePage = await browser.newPage({ viewport: { width: 390, height: 844 } });
-  mobilePage.on("pageerror", (error: { message: string; stack?: string }) => pageErrors.push(error.stack || error.message));
-  mobilePage.on("console", (message: { type: () => string; text: () => string }) => {
+  mobilePage.on("pageerror", (error) => pageErrors.push(error.stack || error.message));
+  mobilePage.on("console", (message) => {
     if (message.type() === "error") pageErrors.push(message.text());
   });
   await mobilePage.goto(`${baseUrl}/`, { waitUntil: "networkidle" });
-  const viewportFits = await mobilePage.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1);
+  const viewportFits = await mobilePage.evaluate(
+    () => document.documentElement.scrollWidth <= window.innerWidth + 1,
+  );
   assert.equal(viewportFits, true, "Mobile page must not overflow horizontally");
   await mobilePage.getByRole("button", { name: "Toggle documentation sidebar" }).click();
   await mobilePage.getByRole("button", { name: "Close documentation sidebar" }).waitFor({ state: "visible" });
-  await mobilePage.getByRole("link", { name: "CLI Reference" }).first().click();
-  await mobilePage.waitForURL(/\/cli\/?$/);
+  await mobilePage.locator("a:visible").filter({ hasText: pageText }).first().click();
+  await mobilePage.waitForURL(new RegExp(`${escapeRegExp(pageRoute)}/?$`));
   await mobilePage.getByRole("button", { name: "Close documentation sidebar" }).waitFor({ state: "detached" });
-  await mobilePage.close();
 
   assert.equal(pageErrors.length, 0, `Browser errors:\n${pageErrors.join("\n")}`);
-  console.log("SSR preview smoke test passed: SSR content, client mount, navigation, and refresh.");
+  await mobilePage.close();
+  await page.close();
+  console.log("Browser/SSR smoke test passed: SSR, hydration, navigation, title, mobile sidebar, and overflow.");
 } finally {
   await browser.close();
   server.kill("SIGTERM");
 }
 
-async function assertText(page: any, text: string) {
-  await page.getByText(text, { exact: false }).first().waitFor({ state: "visible" });
+async function waitForServer() {
+  const deadline = Date.now() + 15_000;
+  while (Date.now() < deadline) {
+    try {
+      const response = await fetch(baseUrl);
+      if (response.ok) return;
+    } catch {
+      // The preview server is still starting.
+    }
+    await new Promise((resolve) => setTimeout(resolve, 100));
+  }
+  throw new Error(`Preview did not start:\n${serverOutput}`);
+}
+
+async function assertText(page: Page, text: string) {
+  await page.getByRole("heading", { name: text, exact: false }).first().waitFor({ state: "visible" });
+}
+
+async function assertTitle(page: Page, text: string) {
+  await page.waitForFunction((expected) => document.title.includes(expected), text);
+}
+
+function escapeRegExp(value: string) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }

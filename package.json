@@ -15,8 +15,8 @@
       "import": "./dist/index.js"
     },
     "./plugin": {
-      "types": "./dist/plugin/index.d.ts",
-      "import": "./dist/plugin/index.js"
+      "types": "./dist/server/plugin.d.ts",
+      "import": "./dist/server/plugin.js"
     },
     "./theme": {
       "types": "./dist/themes/default/index.d.ts",
@@ -29,10 +29,6 @@
     "./themes/*": {
       "types": "./dist/themes/*/index.d.ts",
       "import": "./dist/themes/*/index.js"
-    },
-    "./components": {
-      "types": "./dist/components/index.d.ts",
-      "import": "./dist/components/index.js"
     }
   },
   "files": [
@@ -46,10 +42,17 @@
     "url": "git+https://github.com/nikala-ui/docs-engine.git"
   },
   "scripts": {
+    "typecheck": "bunx tsc --noEmit -p tsconfig.json",
+    "test": "bun test tests",
+    "test:browser": "bun tests/ssr-preview.playwright.ts",
+    "test:generated": "bun tests/generated-project.smoke.ts",
+    "package:check": "bun run build && bun scripts/check-package.ts",
+    "bundle:check": "bun run docs:build && bun scripts/check-bundle.ts",
     "build": "bun scripts/build.ts",
     "docs:dev": "bun run build && bun dist/cli/index.js dev",
     "docs:build": "bun run build && bun dist/cli/index.js build -o .docs-dist",
     "docs:preview": "bun run build && bun dist/cli/index.js build -o .docs-dist && bun dist/cli/index.js preview -o .docs-dist",
+    "check": "bun run typecheck && bun run test && bun run build && bun run docs:build",
     "dev": "tsc -p tsconfig.build.json --watch"
   },
   "dependencies": {
@@ -84,6 +87,7 @@
   "devDependencies": {
     "@types/fs-extra": "^11.0.4",
     "@types/node": "^26.1.1",
+    "playwright": "1.62.1",
     "solid-js": "^1.9.14",
     "tailwindcss": "^4.0.7",
     "typescript": "^5.7.2"

@@ -36,6 +36,7 @@ program
   .description("Locally preview production build")
   .option("-p, --port <port>", "Port to listen on (default: 1862)")
   .option("--host [host]", "Specify host address")
+  .option("-o, --outDir <outDir>", "Build output directory (default: dist)")
   .action((dir, options) => {
     runPreviewCommand(dir, options);
   });

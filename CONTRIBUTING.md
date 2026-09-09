@@ -18,12 +18,44 @@ cd docs-engine
 bun install
 ```
 
-Run the quality checks before opening a pull request:
+Run the local quality contract before opening a pull request:
 
 ```bash
-bun test tests
-bun run build
+bun run check
+bun run test:browser
+bun run test:generated
+bun run package:check
+bun run bundle:check
 ```
+
+The repository supports Bun as the primary package manager. Node.js is used
+only for compatible tooling and deployment integrations; contributors should
+not replace the committed Bun lockfile with another lockfile.
+
+## CI and troubleshooting
+
+Pull requests run the same quality contract locally, followed by browser/SSR,
+generated-consumer, package, bundle, dependency-review, and optional Netlify
+preview checks. Main runs the full quality pipeline and stores build artifacts.
+
+If a check fails locally:
+
+1. Remove only the generated `dist/`, `.docs-dist/`, and temporary test output.
+2. Run `bun install --frozen-lockfile`.
+3. Re-run the failed command directly from `package.json`.
+4. For browser failures, install Chromium with `bunx playwright install chromium`.
+5. For generated-project failures, preserve the temporary project path and
+   inspect its generated `docs.config.ts`, `src/`, and `dist/` before cleanup.
+
+Do not disable a required check to hide a failure. Fix the contract or update
+the test and documentation together.
+
+## Supported release policy
+
+Release tags use the `vMAJOR.MINOR.PATCH` format. A release is published only
+from a matching tag after the complete CI pipeline passes. The package is
+published with npm provenance, and the release workflow performs a clean
+consumer-project smoke test after publication.
 
 ## Coding standards
 

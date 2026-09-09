@@ -191,10 +191,27 @@ async function copyCustomTheme(root: string): Promise<void> {
       .replace(/from "@nikala-ui\/core\/ui\//g, 'from "@/components/ui/')
       .replace(/from "@nikala-ui\/core"/g, 'from "@/components/ui"')
       .replace(/from "@nikala-ui\/hooks"/g, 'from "@/hooks"')
+      .replace(/from "\.\.\/\.\.\/client\/page-actions\.js"/g, 'from "./runtime/page-actions.js"')
+      .replace(/from "\.\.\/\.\.\/navigation\/repository-links\.js"/g, 'from "./runtime/repository-links.js"')
+      .replace(/from "\.\.\/\.\.\/search\/provider\.js"/g, 'from "./runtime/search-provider.js"')
       .replace(/from "\.\.\/\.\.\/\.\.\/navigation\/sidebar-state\.js"/g, 'from "./sidebar-state.js"')
       .replace(/from "(?:\.\.\/)+types\.js"/g, 'from "@nikala-ui/docs"')
       .replace(/from "(\.\.\/|\.\/)[^"]+\.(?:jsx|tsx|js)"/g, (match) => match.replace(/\.(?:jsx|tsx|js)"$/, '"'))
       .replace(/export \* from "(\.\.\/|\.\/)[^"]+\.(?:jsx|tsx|js)"/g, (match) => match.replace(/\.(?:jsx|tsx|js)"$/, '"'));
+    await fs.outputFile(destination, content, "utf-8");
+  }
+
+  const runtimeSources = [
+    ["../../client/page-actions.js", "runtime/page-actions.js"],
+    ["../../navigation/repository-links.js", "runtime/repository-links.js"],
+    ["../../search/provider.js", "runtime/search-provider.js"],
+  ] as const;
+  for (const [relativeSource, relativeDestination] of runtimeSources) {
+    const sourceFile = path.resolve(commandDir, relativeSource);
+    if (!fs.existsSync(sourceFile)) continue;
+    const destination = path.join(target, relativeDestination);
+    const content = (await fs.readFile(sourceFile, "utf-8"))
+      .replace(/from "\.\.\/types\.js"/g, 'from "@nikala-ui/docs"');
     await fs.outputFile(destination, content, "utf-8");
   }
 
