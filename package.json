@@ -48,6 +48,7 @@
   "scripts": {
     "typecheck": "bunx tsc --noEmit -p tsconfig.json",
     "test": "bun test tests",
+    "test:browser": "bun tests/ssr-preview.playwright.ts",
     "build": "bun scripts/build.ts",
     "docs:dev": "bun run build && bun dist/cli/index.js dev",
     "docs:build": "bun run build && bun dist/cli/index.js build -o .docs-dist",
@@ -87,6 +88,7 @@
   "devDependencies": {
     "@types/fs-extra": "^11.0.4",
     "@types/node": "^26.1.1",
+    "playwright": "1.62.1",
     "solid-js": "^1.9.14",
     "tailwindcss": "^4.0.7",
     "typescript": "^5.7.2"
