@@ -42,6 +42,14 @@ function resolvePmCommand(manager: string, command: string): string {
   const trimmed = command.trim();
   const pm = manager.toLowerCase();
 
+  // 0. Package scripts (e.g. "bun run dev")
+  const runMatch = trimmed.match(/^(?:bun|npm|pnpm|yarn)\s+run\s+(.+)$/);
+  if (runMatch) {
+    const script = runMatch[1];
+    if (pm === "yarn") return `yarn ${script}`;
+    return `${pm} run ${script}`;
+  }
+
   // 1. "create" command
   const createMatch = trimmed.match(/^(?:bun|npm|npx|pnpm|yarn|deno)?\s*create\s+(.*)$/);
   if (createMatch) {
