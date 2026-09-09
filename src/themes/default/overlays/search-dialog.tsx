@@ -1,5 +1,5 @@
 // packages/docs/src/themes/default/overlays/search-dialog.tsx
-import { For, Show, type Component } from "solid-js";
+import { createEffect, createSignal, For, Show, type Component } from "solid-js";
 import { CommandDialog } from "@/components/ui/command";
 import { CommandInput } from "@/components/ui/command";
 import { CommandList } from "@/components/ui/command";
@@ -38,17 +38,33 @@ export const DocsSearchDialog: Component<DocsSearchDialogProps> = (props) => {
     >
       {({ search }) => {
         const query = () => search().trim();
-        const resolvedProvider = () => resolveSearchProvider({ provider: props.provider });
-        const filteredPages = () => searchPages(resolvedProvider(), query(), props.pages || []);
+        const resolvedProvider = () => props.adapter
+          ? { requested: props.provider, active: props.adapter.name, fallback: false, implementation: props.adapter }
+          : resolveSearchProvider({ provider: props.provider });
+        const [filteredPages, setFilteredPages] = createSignal(props.pages || []);
+        const [searching, setSearching] = createSignal(false);
+        let requestId = 0;
+
+        createEffect(() => {
+          const currentRequest = ++requestId;
+          setSearching(true);
+          Promise.resolve(searchPages(resolvedProvider(), query(), props.pages || []))
+            .then((results) => {
+              if (currentRequest === requestId) setFilteredPages(results);
+            })
+            .finally(() => {
+              if (currentRequest === requestId) setSearching(false);
+            });
+        });
 
         return (
           <>
             <CommandInput id="docs-search-input" placeholder="Search documentation..." />
             <CommandList>
-              <Show when={query().length > 0 && filteredPages().length === 0}>
+              <Show when={!searching() && query().length > 0 && filteredPages().length === 0}>
                 <CommandEmpty>No matching documents found.</CommandEmpty>
               </Show>
-              <Show when={filteredPages().length > 0}>
+              <Show when={!searching() && filteredPages().length > 0}>
                 <CommandGroup heading="Pages">
                   <For each={filteredPages()}>
                     {(page) => (

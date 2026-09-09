@@ -1,24 +1,29 @@
-import type { DocsConfig } from "../types.js";
-import type { PageData } from "../types.js";
+import type { DocsConfig, PageData } from "../types.js";
 
-export type BuiltInSearchProvider = "local";
-export type ConfiguredSearchProvider = NonNullable<DocsConfig["search"]>["provider"];
+export const LOCAL_SEARCH_PROVIDER = "local";
 
-export interface SearchProvider {
-  id: BuiltInSearchProvider;
-  search: (query: string, pages: PageData[]) => PageData[];
+export interface SearchContext {
+  query: string;
+  pages: PageData[];
 }
+
+export interface SearchAdapter {
+  name: string;
+  search: (context: SearchContext) => PageData[] | Promise<PageData[]>;
+}
+
+export type ConfiguredSearchProvider = NonNullable<DocsConfig["search"]>["provider"];
 
 export interface ResolvedSearchProvider {
   requested: ConfiguredSearchProvider;
-  active: BuiltInSearchProvider;
+  active: string;
   fallback: boolean;
-  implementation: SearchProvider;
+  implementation: SearchAdapter;
 }
 
-const localSearchProvider: SearchProvider = {
-  id: "local",
-  search(query, pages) {
+export const localSearchAdapter: SearchAdapter = {
+  name: LOCAL_SEARCH_PROVIDER,
+  search({ query, pages }) {
     const normalizedQuery = query.trim().toLowerCase();
     if (!normalizedQuery) return pages;
 
@@ -36,12 +41,23 @@ const localSearchProvider: SearchProvider = {
  * the configuration contract or leaving the search dialog non-functional.
  */
 export function resolveSearchProvider(search?: DocsConfig["search"]): ResolvedSearchProvider {
-  const requested = search?.provider || "local";
+  const requested = search?.provider?.trim() || LOCAL_SEARCH_PROVIDER;
+  const configuredAdapter = search?.adapter;
+
+  if (configuredAdapter) {
+    return {
+      requested,
+      active: configuredAdapter.name,
+      fallback: configuredAdapter.name !== requested,
+      implementation: configuredAdapter,
+    };
+  }
+
   return {
     requested,
-    active: "local",
-    fallback: requested !== "local",
-    implementation: localSearchProvider,
+    active: LOCAL_SEARCH_PROVIDER,
+    fallback: requested !== LOCAL_SEARCH_PROVIDER,
+    implementation: localSearchAdapter,
   };
 }
 
@@ -49,6 +65,6 @@ export function searchPages(
   provider: ResolvedSearchProvider,
   query: string,
   pages: PageData[],
-): PageData[] {
-  return provider.implementation.search(query, pages);
+): PageData[] | Promise<PageData[]> {
+  return provider.implementation.search({ query, pages });
 }

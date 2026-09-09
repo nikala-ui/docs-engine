@@ -19,7 +19,26 @@ Set `enabled: false` to remove the search trigger and disable the default
 theme's keyboard shortcut.
 
 The default theme implements `local`, which searches page titles, URLs, and
-descriptions. If `pagefind`, `orama`, or `algolia` is selected before a
-corresponding integration is installed, the engine safely falls back to the
-local implementation while preserving the requested provider in the resolved
-configuration.
+descriptions. External integrations provide a `SearchAdapter` through the
+configuration instead of requiring provider-specific code in Folio:
+
+```ts
+import type { SearchAdapter } from "@nikala-ui/folio";
+
+const adapter: SearchAdapter = {
+  name: "my-search",
+  async search({ query, pages }) {
+    return pages.filter((page) => page.title.toLowerCase().includes(query.toLowerCase()));
+  },
+};
+
+export default {
+  search: {
+    provider: adapter.name,
+    adapter,
+  },
+};
+```
+
+If a provider name is configured without an adapter, the engine safely falls
+back to the built-in local implementation.

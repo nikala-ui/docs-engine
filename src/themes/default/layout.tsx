@@ -195,7 +195,7 @@ export const DocsLayout: ParentComponent<DocsLayoutProps> = (props) => {
           </Container>
         </Show>
       </Container>
-      <DocsSearchDialog open={searchOpen()} onOpenChange={setSearchOpen} pages={local.pages} provider={searchEnabled() ? searchProvider().active : undefined} />
+      <DocsSearchDialog open={searchOpen()} onOpenChange={setSearchOpen} pages={local.pages} provider={searchEnabled() ? searchProvider().active : undefined} adapter={searchEnabled() ? searchProvider().implementation : undefined} />
     </SidebarInset>
   );
 
@@ -216,7 +216,7 @@ export const DocsLayout: ParentComponent<DocsLayoutProps> = (props) => {
           </Show>
         </Container>
       </Container>
-      <DocsSearchDialog open={searchOpen()} onOpenChange={setSearchOpen} pages={local.pages} provider={searchEnabled() ? searchProvider().active : undefined} />
+      <DocsSearchDialog open={searchOpen()} onOpenChange={setSearchOpen} pages={local.pages} provider={searchEnabled() ? searchProvider().active : undefined} adapter={searchEnabled() ? searchProvider().implementation : undefined} />
     </SidebarInset>
   );
 

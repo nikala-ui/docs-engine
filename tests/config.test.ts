@@ -21,8 +21,8 @@ describe("docs config", () => {
   });
 
   test("falls back unsupported providers to local search", () => {
-    const resolved = resolveSearchProvider({ enabled: true, provider: "algolia" });
-    expect(resolved.requested).toBe("algolia");
+    const resolved = resolveSearchProvider({ enabled: true, provider: "unavailable" });
+    expect(resolved.requested).toBe("unavailable");
     expect(resolved.active).toBe("local");
     expect(resolved.fallback).toBe(true);
   });
@@ -34,6 +34,18 @@ describe("docs config", () => {
     ] as never[];
 
     expect(searchPages(resolveSearchProvider({ provider: "local" }), "folio", pages)).toHaveLength(1);
-    expect(searchPages(resolveSearchProvider({ provider: "algolia" }), "styles", pages)).toHaveLength(1);
+    expect(searchPages(resolveSearchProvider({ provider: "unavailable" }), "styles", pages)).toHaveLength(1);
+  });
+
+  test("accepts an external adapter without provider-specific engine code", async () => {
+    const adapter = {
+      name: "custom",
+      search: async ({ pages }: { pages: typeof pages; query: string }) => pages.slice(0, 1),
+    };
+    const resolved = resolveSearchProvider({ provider: "custom", adapter });
+
+    expect(resolved.active).toBe("custom");
+    expect(resolved.fallback).toBe(false);
+    expect(await searchPages(resolved, "anything", [{ title: "One" }] as never[])).toHaveLength(1);
   });
 });
