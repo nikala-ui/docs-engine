@@ -46,10 +46,13 @@
     "url": "git+https://github.com/nikala-ui/docs-engine.git"
   },
   "scripts": {
+    "typecheck": "bunx tsc --noEmit -p tsconfig.json",
+    "test": "bun test tests",
     "build": "bun scripts/build.ts",
     "docs:dev": "bun run build && bun dist/cli/index.js dev",
     "docs:build": "bun run build && bun dist/cli/index.js build -o .docs-dist",
     "docs:preview": "bun run build && bun dist/cli/index.js build -o .docs-dist && bun dist/cli/index.js preview -o .docs-dist",
+    "check": "bun run typecheck && bun run test && bun run build && bun run docs:build",
     "dev": "tsc -p tsconfig.build.json --watch"
   },
   "dependencies": {
