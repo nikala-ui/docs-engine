@@ -63,7 +63,7 @@
     "@shikijs/langs": "^4.4.3",
     "@shikijs/themes": "^4.4.3",
     "@tailwindcss/vite": "^4.0.7",
-    "chokidar": "^4.0.3",
+    "chokidar": "^5.0.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "commander": "^15.0.0",
