@@ -1,6 +1,6 @@
 {
   "name": "@nikala-ui/folio",
-  "version": "0.13.1",
+  "version": "0.13.2",
   "license": "MIT",
   "description": "Zero-config, fast, and elegant documentation engine for SolidJS, built on Nikala UI and Tailwind CSS v4",
   "type": "module",
