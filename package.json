@@ -47,6 +47,7 @@
     "test:browser": "bun tests/ssr-preview.playwright.ts",
     "test:generated": "bun tests/generated-project.smoke.ts",
     "package:check": "bun run build && bun scripts/check-package.ts",
+    "bundle:check": "bun run docs:build && bun scripts/check-bundle.ts",
     "build": "bun scripts/build.ts",
     "docs:dev": "bun run build && bun dist/cli/index.js dev",
     "docs:build": "bun run build && bun dist/cli/index.js build -o .docs-dist",

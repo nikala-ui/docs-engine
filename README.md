@@ -208,6 +208,7 @@ bunx playwright install chromium # Install the local browser test runtime
 bun run test:browser # Run browser, SSR, and hydration smoke tests
 bun run test:generated # Test a clean generated consumer project
 bun run package:check  # Validate the publishable package artifact
+bun run bundle:check   # Report and validate production bundle sizes
 bun run build        # Build the engine and CLI into dist/
 bun run docs:build   # Build the self-hosted site into .docs-dist/
 bun run check        # Run the complete local quality contract
