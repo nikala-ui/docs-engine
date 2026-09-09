@@ -206,6 +206,7 @@ bun run typecheck    # Run the strict TypeScript check
 bun run test         # Run unit and integration tests
 bunx playwright install chromium # Install the local browser test runtime
 bun run test:browser # Run browser, SSR, and hydration smoke tests
+bun run test:generated # Test a clean generated consumer project
 bun run build        # Build the engine and CLI into dist/
 bun run docs:build   # Build the self-hosted site into .docs-dist/
 bun run check        # Run the complete local quality contract

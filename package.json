@@ -49,6 +49,7 @@
     "typecheck": "bunx tsc --noEmit -p tsconfig.json",
     "test": "bun test tests",
     "test:browser": "bun tests/ssr-preview.playwright.ts",
+    "test:generated": "bun tests/generated-project.smoke.ts",
     "build": "bun scripts/build.ts",
     "docs:dev": "bun run build && bun dist/cli/index.js dev",
     "docs:build": "bun run build && bun dist/cli/index.js build -o .docs-dist",
