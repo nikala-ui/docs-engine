@@ -1,0 +1,43 @@
+name: Bug report
+description: Report a reproducible problem in the docs engine.
+title: "bug: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please search existing issues first and include the smallest reproducible example.
+  - type: input
+    id: version
+    attributes:
+      label: Package version
+      placeholder: "0.12.2"
+    validations:
+      required: true
+  - type: input
+    id: runtime
+    attributes:
+      label: Runtime and package manager
+      placeholder: "Bun 1.3.14, Linux"
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction
+      description: Include commands, configuration, and a minimal content file.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true
