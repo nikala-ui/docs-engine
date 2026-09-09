@@ -183,9 +183,11 @@ async function copyCustomTheme(root: string): Promise<void> {
   for (const sourceFile of await listSourceFiles(source)) {
     const basename = path.basename(sourceFile);
     const isSourceFile = /\.(ts|tsx)$/.test(sourceFile);
-    const isPublishedThemeFile = /\.jsx$/.test(sourceFile) || basename === "index.js";
+    const isPublishedThemeFile = /\.jsx?$/.test(sourceFile);
     if ((!isSourceFile && !isPublishedThemeFile) || basename !== basename.toLowerCase()) continue;
-    const relative = path.relative(source, sourceFile).replace(/\.jsx$/, ".tsx").replace(/index\.js$/, "index.ts");
+    const relative = path.relative(source, sourceFile)
+      .replace(/\.jsx?$/, ".tsx")
+      .replace(/index\.tsx$/, "index.ts");
     const destination = path.join(target, relative);
     let content = await fs.readFile(sourceFile, "utf-8");
     content = content
