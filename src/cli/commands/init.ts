@@ -27,7 +27,7 @@ async function resolveRegistryDir(): Promise<string> {
   const commandDir = path.dirname(fileURLToPath(import.meta.url));
   const bundledRegistry = path.resolve(commandDir, "../../registry");
   if (await fs.pathExists(bundledRegistry)) return bundledRegistry;
-  throw new Error("Nikala Docs registry is unavailable. Rebuild @nikala-ui/docs before running init.");
+  throw new Error("Folio registry is unavailable. Rebuild @nikala-ui/folio before running init.");
 }
 
 function runNikalaInit(root: string): void {
@@ -175,7 +175,7 @@ async function copyCustomTheme(root: string): Promise<void> {
   const source = sourceCandidates.find((candidate) => fs.existsSync(candidate));
   const target = path.join(root, "src/themes/default");
   if (!source) {
-    await fs.outputFile(path.join(target, "index.ts"), `export { defaultTheme as default } from "@nikala-ui/docs";
+    await fs.outputFile(path.join(target, "index.ts"), `export { defaultTheme as default } from "@nikala-ui/folio";
 `, "utf-8");
     return;
   }
@@ -195,7 +195,7 @@ async function copyCustomTheme(root: string): Promise<void> {
       .replace(/from "\.\.\/\.\.\/navigation\/repository-links\.js"/g, 'from "./runtime/repository-links.js"')
       .replace(/from "\.\.\/\.\.\/search\/provider\.js"/g, 'from "./runtime/search-provider.js"')
       .replace(/from "\.\.\/\.\.\/\.\.\/navigation\/sidebar-state\.js"/g, 'from "./sidebar-state.js"')
-      .replace(/from "(?:\.\.\/)+types\.js"/g, 'from "@nikala-ui/docs"')
+      .replace(/from "(?:\.\.\/)+types\.js"/g, 'from "@nikala-ui/folio"')
       .replace(/from "(\.\.\/|\.\/)[^"]+\.(?:jsx|tsx|js)"/g, (match) => match.replace(/\.(?:jsx|tsx|js)"$/, '"'))
       .replace(/export \* from "(\.\.\/|\.\/)[^"]+\.(?:jsx|tsx|js)"/g, (match) => match.replace(/\.(?:jsx|tsx|js)"$/, '"'));
     await fs.outputFile(destination, content, "utf-8");
@@ -211,7 +211,7 @@ async function copyCustomTheme(root: string): Promise<void> {
     if (!fs.existsSync(sourceFile)) continue;
     const destination = path.join(target, relativeDestination);
     const content = (await fs.readFile(sourceFile, "utf-8"))
-      .replace(/from "\.\.\/types\.js"/g, 'from "@nikala-ui/docs"');
+      .replace(/from "\.\.\/types\.js"/g, 'from "@nikala-ui/folio"');
     await fs.outputFile(destination, content, "utf-8");
   }
 
@@ -222,7 +222,7 @@ async function copyCustomTheme(root: string): Promise<void> {
   const navigationSource = navigationCandidates.find((candidate) => fs.existsSync(candidate));
   if (navigationSource) {
     const navigationContent = (await fs.readFile(navigationSource, "utf-8"))
-      .replace(/from "\.\.\/types\.js"/g, 'from "@nikala-ui/docs"');
+      .replace(/from "\.\.\/types\.js"/g, 'from "@nikala-ui/folio"');
     await fs.outputFile(path.join(target, "navigation/sidebar-state.ts"), navigationContent, "utf-8");
   }
 }
@@ -244,7 +244,7 @@ async function writeProjectFiles(root: string, registryDependencies: string[]): 
   const docsConfigPath = path.join(root, "docs.config.ts");
   if (!(await fs.pathExists(docsConfigPath))) await fs.outputFile(docsConfigPath, `export default {
   title: "My Project Docs",
-  description: "Documentation built with Nikala Docs and SolidJS",
+  description: "Documentation built with Folio and SolidJS",
   favicon: "/favicon.ico",
   contentDir: "docs",
   css: "src/index.css",
@@ -278,10 +278,10 @@ async function writeProjectFiles(root: string, registryDependencies: string[]): 
     && docsPackageRoot === path.join(workspaceRoot, "packages/docs");
   const targetIsInWorkspace = root === workspaceRoot || root.startsWith(`${workspaceRoot}${path.sep}`);
   const defaultPackageJson = {
-    name: "nikala-docs-example",
+    name: "folio-example",
     private: true,
     type: "module",
-  scripts: { dev: "bunx @nikala-ui/docs dev", build: "bunx @nikala-ui/docs build", preview: "bunx @nikala-ui/docs preview" },
+  scripts: { dev: "bunx @nikala-ui/folio dev", build: "bunx @nikala-ui/folio build", preview: "bunx @nikala-ui/folio preview" },
     dependencies: {},
   };
   const existingPackageJson = await fs.pathExists(packagePath) ? await fs.readJson(packagePath) : {};
@@ -292,18 +292,18 @@ async function writeProjectFiles(root: string, registryDependencies: string[]): 
   };
   const docsPackageManifest = await fs.readJson(path.join(docsPackageRoot, "package.json"));
   const publishedDocsVersion = `^${docsPackageManifest.version}`;
-  const localDocsLink = path.join(root, "node_modules/@nikala-ui/docs");
+  const localDocsLink = path.join(root, "node_modules/@nikala-ui/folio");
   const hasLocalDocsLink = await fs.pathExists(localDocsLink) && (await fs.lstat(localDocsLink)).isSymbolicLink();
   const docsDependency = hasLocalDocsLink
-    ? "link:@nikala-ui/docs"
+    ? "link:@nikala-ui/folio"
     : isWorkspacePackage
       ? targetIsInWorkspace
         ? "workspace:*"
-        : "link:@nikala-ui/docs"
-      : packageJson.dependencies?.["@nikala-ui/docs"] || publishedDocsVersion;
+        : "link:@nikala-ui/folio"
+      : packageJson.dependencies?.["@nikala-ui/folio"] || publishedDocsVersion;
   packageJson.dependencies = {
     ...packageJson.dependencies,
-    "@nikala-ui/docs": docsDependency,
+    "@nikala-ui/folio": docsDependency,
     ...(packageJson.dependencies?.["solid-js"] ? {} : { "solid-js": "latest" }),
     ...(packageJson.dependencies?.tailwindcss ? {} : { tailwindcss: "latest" }),
     ...Object.fromEntries(registryDependencies
@@ -320,7 +320,7 @@ async function writeProjectFiles(root: string, registryDependencies: string[]): 
 export async function runInitCommand(targetDir = "."): Promise<void> {
   const root = path.resolve(process.cwd(), targetDir);
   console.log();
-  console.log(pc.bold(pc.cyan("  Nikala Docs Engine ")) + pc.dim("v0.12.2"));
+  console.log(pc.bold(pc.cyan("  Folio ")) + pc.dim("v0.12.2"));
   console.log(pc.dim(`  Initializing copy-paste documentation project in ${pc.bold(root)}...`));
   console.log();
   await fs.ensureDir(root);
@@ -350,6 +350,6 @@ Your Nikala UI components and reactive hooks are owned locally in **src/componen
   console.log(`  ${pc.green("✓")} Registered ${copied.dependencies.length} component dependencies`);
   console.log(`  ${pc.green("✓")} Created ${pc.cyan("docs")}, ${pc.cyan("src/themes/default")}, and local Tailwind tokens`);
   console.log();
-  console.log(`  ${pc.bold(pc.green("Success!"))} Run ${pc.cyan("bunx @nikala-ui/docs dev")} to start your docs.`);
+  console.log(`  ${pc.bold(pc.green("Success!"))} Run ${pc.cyan("bunx @nikala-ui/folio dev")} to start your docs.`);
   console.log();
 }

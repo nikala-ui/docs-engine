@@ -17,28 +17,28 @@ export interface NikalaDocsPluginOptions {
   config?: DocsConfig;
 }
 
-const VIRTUAL_CONFIG_ID = "virtual:nikala-docs-config";
+const VIRTUAL_CONFIG_ID = "virtual:folio-config";
 const RESOLVED_CONFIG_ID = "\0" + VIRTUAL_CONFIG_ID;
 
-const VIRTUAL_TREE_ID = "virtual:nikala-docs-tree";
+const VIRTUAL_TREE_ID = "virtual:folio-tree";
 const RESOLVED_TREE_ID = "\0" + VIRTUAL_TREE_ID;
 
-const VIRTUAL_ROUTES_ID = "virtual:nikala-docs-routes";
+const VIRTUAL_ROUTES_ID = "virtual:folio-routes";
 const RESOLVED_ROUTES_ID = "\0" + VIRTUAL_ROUTES_ID;
 
-const VIRTUAL_SOURCES_ID = "virtual:nikala-docs-sources";
+const VIRTUAL_SOURCES_ID = "virtual:folio-sources";
 const RESOLVED_SOURCES_ID = "\0" + VIRTUAL_SOURCES_ID;
 
-const VIRTUAL_COMPONENTS_ID = "virtual:nikala-docs-components";
+const VIRTUAL_COMPONENTS_ID = "virtual:folio-components";
 const RESOLVED_COMPONENTS_ID = "\0" + VIRTUAL_COMPONENTS_ID;
 
-const VIRTUAL_ICONS_ID = "virtual:nikala-docs-icons";
+const VIRTUAL_ICONS_ID = "virtual:folio-icons";
 const RESOLVED_ICONS_ID = "\0" + VIRTUAL_ICONS_ID;
 
-const VIRTUAL_THEME_ID = "virtual:nikala-docs-theme";
+const VIRTUAL_THEME_ID = "virtual:folio-theme";
 const RESOLVED_THEME_ID = "\0" + VIRTUAL_THEME_ID;
 
-const VIRTUAL_SHIKI_ID = "virtual:nikala-docs-shiki-stub";
+const VIRTUAL_SHIKI_ID = "virtual:folio-shiki-stub";
 const RESOLVED_SHIKI_ID = "\0" + VIRTUAL_SHIKI_ID;
 
 const CONFIG_FILENAMES = new Set([
@@ -103,7 +103,7 @@ function getComponentSourceDir(rootDir: string): string {
   ];
   const source = candidates.find((candidate) => fs.existsSync(candidate));
   if (source) return source;
-  throw new Error("Nikala Docs local component sources are missing");
+  throw new Error("Folio local component sources are missing");
 }
 
 function collectComponentExports(directory: string): Array<{ name: string; file: string }> {
@@ -181,12 +181,12 @@ export function nikalaDocsPlugin(options: NikalaDocsPluginOptions = {}): Plugin 
   // project root, so content/config paths must always resolve from configRoot.
   let rootDir = path.resolve(options.configRoot || process.cwd());
   let docsDir = options.docsDir ? path.resolve(rootDir, options.docsDir) : path.resolve(rootDir, "docs");
-  let resolvedConfig: DocsConfig = options.config || { title: "Nikala Docs" };
+  let resolvedConfig: DocsConfig = options.config || { title: "Folio" };
   let cachedPages: PageData[] = [];
   let isSsrBuild = false;
 
   return {
-    name: "vite-plugin-nikala-docs",
+    name: "vite-plugin-folio",
     enforce: "pre",
 
     async configResolved(viteConfig) {
@@ -378,7 +378,7 @@ export default components;
             require.resolve(`lucide-solid/icons/${kebabName}`);
             entries.push({ name, specifier: `lucide-solid/icons/${kebabName}` });
           } catch {
-            console.warn(`[nikala-docs] Unknown Lucide icon "${name}"; skipping it.`);
+            console.warn(`[folio] Unknown Lucide icon "${name}"; skipping it.`);
           }
         }
 
@@ -409,7 +409,7 @@ ${iconEntries.join(",\n")}
           path.join(requestedPath, "index.jsx"),
         ];
         const themeEntry = candidates.find((candidate) => fs.existsSync(candidate));
-        if (!themeEntry) throw new Error(`[nikala-docs] Theme path does not exist: ${requestedPath}`);
+        if (!themeEntry) throw new Error(`[folio] Theme path does not exist: ${requestedPath}`);
         return `import configuredTheme from ${JSON.stringify(themeEntry)}; export const theme = configuredTheme.default || configuredTheme; export default theme;`;
       }
 

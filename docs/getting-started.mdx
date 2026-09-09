@@ -1,11 +1,11 @@
 ---
 title: Getting Started
-description: Install Nikala Docs Engine and create your first documentation site.
+description: Install Folio and create your first documentation site.
 icon: rocket
 order: 2
 ---
 
-Nikala Docs Engine turns an existing SolidJS project into a file-based
+Folio turns an existing SolidJS project into a file-based
 documentation site. Pages are written in MDX, routes are derived from the
 content directory, and the default theme provides navigation, search, syntax
 highlighting, and responsive layouts.
@@ -28,10 +28,10 @@ Install the engine in an existing project:
 <PackageManagerTabs
   managers={["bun", "pnpm", "npm", "yarn"]}
   commands={{
-    bun: "bun add @nikala-ui/docs",
-    pnpm: "pnpm add @nikala-ui/docs",
-    npm: "npm install @nikala-ui/docs",
-    yarn: "yarn add @nikala-ui/docs"
+    bun: "bun add @nikala-ui/folio",
+    pnpm: "pnpm add @nikala-ui/folio",
+    npm: "npm install @nikala-ui/folio",
+    yarn: "yarn add @nikala-ui/folio"
   }}
 />
 
@@ -40,10 +40,10 @@ Then initialize the documentation structure:
 <PackageManagerTabs
   managers={["bunx", "pnpm", "npx", "yarn"]}
   commands={{
-    bunx: "bunx @nikala-ui/docs init .",
-    pnpm: "pnpm dlx @nikala-ui/docs init .",
-    npx: "npx @nikala-ui/docs init .",
-    yarn: "yarn dlx @nikala-ui/docs init ."
+    bunx: "bunx @nikala-ui/folio init .",
+    pnpm: "pnpm dlx @nikala-ui/folio init .",
+    npx: "npx @nikala-ui/folio init .",
+    yarn: "yarn dlx @nikala-ui/folio init ."
   }}
 />
 
@@ -133,7 +133,7 @@ The initializer creates `docs.config.ts` in the project root. A minimal
 configuration looks like this:
 
 ```ts
-import type { DocsConfig } from "@nikala-ui/docs";
+import type { DocsConfig } from "@nikala-ui/folio";
 
 const config: DocsConfig = {
   title: "My Project Docs",

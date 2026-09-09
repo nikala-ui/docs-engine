@@ -1,12 +1,12 @@
 import type { DocsConfig } from "./src/types.js";
 
 const config: DocsConfig = {
-  title: "Nikala Docs Engine",
+  title: "Folio",
   description: "A fast, elegant, and customizable documentation engine for SolidJS.",
   favicon: "/favicon.ico",
   contentDir: "docs",
   repository: {
-    url: "https://github.com/nikala-ui/docs-engine",
+    url: "https://github.com/nikala-ui/folio",
     branch: "main",
     rootDir: "",
   },
@@ -42,7 +42,7 @@ const config: DocsConfig = {
       header: true,
       footer: false,
       headerSubtitle: "Documentation Engine",
-      footerText: "Nikala Docs Engine",
+      footerText: "Folio",
     },
   },
   search: {

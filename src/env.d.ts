@@ -2,29 +2,29 @@
 
 declare module "*.css";
 
-declare module "virtual:nikala-docs-config" {
+declare module "virtual:folio-config" {
   const config: any;
   export default config;
 }
 
-declare module "virtual:nikala-docs-tree" {
+declare module "virtual:folio-tree" {
   export const pages: any[];
   export const tree: any[];
   const def: { pages: any[]; tree: any[] };
   export default def;
 }
 
-declare module "virtual:nikala-docs-routes" {
+declare module "virtual:folio-routes" {
   export const routes: Record<string, () => Promise<any>>;
   const def: Record<string, () => Promise<any>>;
   export default def;
 }
 
-declare module "virtual:nikala-docs-components" {
+declare module "virtual:folio-components" {
   const components: Record<string, any>;
   export default components;
 }
 
-declare module "virtual:nikala-docs-icons" {
+declare module "virtual:folio-icons" {
   export const icons: Record<string, any>;
 }

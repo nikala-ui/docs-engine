@@ -97,7 +97,7 @@ export function createDocsRouter(options: DocsRouterOptions): DocsRouter {
       })
       .catch((error) => {
         if (requestId !== loadRequest) return;
-        console.error(`[nikala-docs] Failed to load page: ${url}`, error);
+        console.error(`[folio] Failed to load page: ${url}`, error);
         setLoadedPageModule(undefined);
       });
   });

@@ -128,7 +128,7 @@ jobs:
         run: |
           VERSION="${PACKAGE_VERSION#v}"
           for attempt in $(seq 1 12); do
-            if npm view "@nikala-ui/docs@$VERSION" version >/dev/null 2>&1; then exit 0; fi
+            if npm view "@nikala-ui/folio@$VERSION" version >/dev/null 2>&1; then exit 0; fi
             sleep 10
           done
           exit 1
@@ -140,6 +140,6 @@ jobs:
           mkdir -p /tmp/nikala-release-smoke
           cd /tmp/nikala-release-smoke
           bun init -y
-          bun add "@nikala-ui/docs@$VERSION"
-          bunx @nikala-ui/docs init .
-          bunx @nikala-ui/docs build
+          bun add "@nikala-ui/folio@$VERSION"
+          bunx @nikala-ui/folio init .
+          bunx @nikala-ui/folio build

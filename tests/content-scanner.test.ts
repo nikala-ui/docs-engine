@@ -95,7 +95,7 @@ API table.
       const path = await import("node:path");
       const os = await import("node:os");
 
-      const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "nikala-docs-test-"));
+      const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "folio-test-"));
 
       try {
         await fs.ensureDir(path.join(tempDir, "components"));

@@ -7,15 +7,15 @@ import { fileURLToPath } from "node:url";
 
 const packageRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const cliPath = path.join(packageRoot, "dist/cli/index.js");
-const tempRoot = await mkdtemp(path.join(os.tmpdir(), "nikala-docs-consumer-"));
+const tempRoot = await mkdtemp(path.join(os.tmpdir(), "folio-consumer-"));
 const packageLink = `file:${packageRoot}`;
 
 try {
   await writeFile(path.join(tempRoot, "package.json"), JSON.stringify({
-    name: "nikala-docs-smoke-project",
+    name: "folio-smoke-project",
     private: true,
     type: "module",
-    dependencies: { "@nikala-ui/docs": packageLink },
+    dependencies: { "@nikala-ui/folio": packageLink },
   }, null, 2) + "\n");
 
   execFileSync(process.execPath, [cliPath, "init", "."], {
@@ -36,7 +36,7 @@ try {
   }
 
   const packageJson = JSON.parse(await readFile(path.join(tempRoot, "package.json"), "utf8"));
-  assert.equal(packageJson.dependencies["@nikala-ui/docs"], packageLink);
+  assert.equal(packageJson.dependencies["@nikala-ui/folio"], packageLink);
 
   execFileSync(process.execPath, ["install", "--frozen-lockfile"], {
     cwd: tempRoot,

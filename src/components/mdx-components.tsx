@@ -6,7 +6,7 @@ import { twMerge } from "tailwind-merge";
 // component sources. The source modules load only when an MDX component is
 // actually rendered.
 // @ts-ignore
-import Core from "virtual:nikala-docs-components";
+import Core from "virtual:folio-components";
 
 const cn = (...values: unknown[]) => twMerge(clsx(values));
 type HtmlProps<T extends HTMLElement> = JSX.HTMLAttributes<T>;

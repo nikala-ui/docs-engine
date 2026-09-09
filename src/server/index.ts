@@ -48,7 +48,7 @@ function getDocsSourceDir(): string {
   ];
   const source = candidates.find((candidate) => fs.existsSync(candidate));
   if (source) return source;
-  throw new Error("Nikala Docs local source snapshot is missing");
+  throw new Error("Folio local source snapshot is missing");
 }
 
 function createLocalBarrelPlugin(
@@ -57,8 +57,8 @@ function createLocalBarrelPlugin(
   libSource: string,
   providersSource: string,
 ) {
-  const componentModule = "\0nikala-docs-local-components";
-  const hooksModule = "\0nikala-docs-local-hooks";
+  const componentModule = "\0folio-local-components";
+  const hooksModule = "\0folio-local-hooks";
 
   const exportsFor = (directory: string, namedOnly?: string): string => {
     if (!fs.existsSync(directory)) return "";
@@ -72,7 +72,7 @@ function createLocalBarrelPlugin(
   };
 
   return {
-    name: "nikala-docs-local-barrels",
+    name: "folio-local-barrels",
     resolveId(source: string) {
       if (source === "@/components/ui") return componentModule;
       if (source === "@/hooks") return hooksModule;
@@ -103,7 +103,7 @@ function resolveSourceFile(directory: string, relativePath: string): string | un
 
 function createLocalHooksFallbackPlugin(localHooks: string, bundledHooks: string) {
   return {
-    name: "nikala-docs-local-hooks-fallback",
+    name: "folio-local-hooks-fallback",
     enforce: "pre" as const,
     resolveId(source: string) {
       if (source.startsWith("@/hooks/")) {
@@ -229,7 +229,7 @@ function safeHref(value: string): string {
   if (!href) return "#";
 
   try {
-    const protocol = new URL(href, "https://nikala-docs.invalid").protocol;
+    const protocol = new URL(href, "https://folio.invalid").protocol;
     if (protocol !== "http:" && protocol !== "https:" && protocol !== "mailto:") return "#";
   } catch {
     return "#";
@@ -339,7 +339,7 @@ async function createSsrRenderer(options: DocsServerOptions): Promise<SsrRendere
   const ssrEntry = path.join(getClientDir(), "ssr-entry.jsx");
   if (!fs.existsSync(ssrEntry)) return undefined;
 
-  const ssrOutDir = await fs.mkdtemp(path.join(os.tmpdir(), "nikala-docs-ssr-"));
+  const ssrOutDir = await fs.mkdtemp(path.join(os.tmpdir(), "folio-ssr-"));
   try {
     await build({
       ...getSharedConfig(options, false, true),
@@ -368,7 +368,7 @@ async function createSsrRenderer(options: DocsServerOptions): Promise<SsrRendere
     };
   } catch (error) {
     console.warn(
-      "[nikala-docs] SSR renderer unavailable; using static prerender:",
+      "[folio] SSR renderer unavailable; using static prerender:",
       error instanceof Error ? (error.stack || error.message).split("\n").slice(0, 8).join("\n") : error
     );
     await fs.remove(ssrOutDir);
@@ -399,7 +399,7 @@ async function prerenderDocs(options: DocsServerOptions, outDir: string, templat
           const rendered = await renderWithTimeout(renderer, page.url);
           if (rendered.trim()) content = rendered;
         } catch (error) {
-          console.warn(`[nikala-docs] SSR fallback for ${page.url}:`, error instanceof Error ? error.message : error);
+          console.warn(`[folio] SSR fallback for ${page.url}:`, error instanceof Error ? error.message : error);
         }
       }
 
@@ -472,7 +472,7 @@ export async function createDocsServer(options: DocsServerOptions = {}): Promise
       res.setHeader("Content-Type", "text/html; charset=utf-8");
       res.end(html);
     } catch (error) {
-      console.warn(`[nikala-docs] Dev HTML fallback for ${requestPath}:`, error instanceof Error ? error.message : error);
+      console.warn(`[folio] Dev HTML fallback for ${requestPath}:`, error instanceof Error ? error.message : error);
       next();
     }
   };

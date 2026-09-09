@@ -18,7 +18,7 @@ import type { DocsNavbarProps } from "../types.js";
 export const DocsNavbar: Component<DocsNavbarProps> = (props) => {
   const [local, rest] = splitProps(props, ["config", "onOpenSearch", "showBrand", "showSidebarTrigger", "mobileSidebarTrigger", "class"]);
 
-  const title = () => local.config.title || "Nikala Docs";
+  const title = () => local.config.title || "Folio";
   const logoText = () => local.config.logo?.text || title();
   const logoHref = () => local.config.logo?.href || "/";
   const repoUrl = () => local.config.repository?.url;

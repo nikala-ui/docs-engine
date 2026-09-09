@@ -3,7 +3,7 @@
   "configVersion": 1,
   "workspaces": {
     "": {
-      "name": "@nikala-ui/docs",
+      "name": "@nikala-ui/folio",
       "dependencies": {
         "@kobalte/core": "^0.13.12",
         "@mdx-js/mdx": "^3.1.0",

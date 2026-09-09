@@ -7,18 +7,18 @@ import { createPageNavigation } from "./navigation/page-navigation.js";
 import { createDocsRouter } from "./routing/use-docs-router.js";
 
 // @ts-ignore
-import rawConfig from "virtual:nikala-docs-config";
+import rawConfig from "virtual:folio-config";
 // @ts-ignore
-import { tree as sidebarTree, pages as allPages } from "virtual:nikala-docs-tree";
+import { tree as sidebarTree, pages as allPages } from "virtual:folio-tree";
 // @ts-ignore
-import { routes as pageRoutes } from "virtual:nikala-docs-routes";
+import { routes as pageRoutes } from "virtual:folio-routes";
 // @ts-ignore
-import { sources as pageSources } from "virtual:nikala-docs-sources";
+import { sources as pageSources } from "virtual:folio-sources";
 
 export type { AppProps } from "./app-types.js";
 
 export const App: Component<AppProps> = (props) => {
-  const config = rawConfig || { title: "Nikala Docs" };
+  const config = rawConfig || { title: "Folio" };
 
   const router = createDocsRouter({
     initialPath: props.initialPath,

@@ -38,7 +38,7 @@ dialog.
 
 ```tsx
 // src/themes/custom/index.tsx
-import type { DocsThemeContract } from "@nikala-ui/docs/theme";
+import type { DocsThemeContract } from "@nikala-ui/folio/theme";
 import { CustomLayout } from "./layout";
 
 const customTheme: DocsThemeContract = {
@@ -54,7 +54,7 @@ The `Layout` component itself can live in the same directory:
 ```tsx
 // src/themes/custom/layout.tsx
 import type { Component } from "solid-js";
-import type { DocsLayoutProps } from "@nikala-ui/docs/theme";
+import type { DocsLayoutProps } from "@nikala-ui/folio/theme";
 
 export const CustomLayout: Component<DocsLayoutProps> = (props) => (
   <main>

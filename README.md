@@ -1,6 +1,8 @@
-# @nikala-ui/docs
+# @nikala-ui/folio
 
-`@nikala-ui/docs` is a file-based documentation engine for SolidJS projects.
+![Folio documentation site](.github/assets/screenshot.png)
+
+`@nikala-ui/folio` is a file-based documentation engine for SolidJS projects.
 It compiles MDX content with Vite, renders server-side pages, and provides a
 responsive documentation theme with navigation, search, syntax highlighting,
 and Tailwind CSS v4 design tokens.
@@ -31,16 +33,16 @@ manager:
 
 ```bash
 # Bun
-bun add @nikala-ui/docs
+bun add @nikala-ui/folio
 
 # pnpm
-pnpm add @nikala-ui/docs
+pnpm add @nikala-ui/folio
 
 # npm
-npm install @nikala-ui/docs
+npm install @nikala-ui/folio
 
 # yarn
-yarn add @nikala-ui/docs
+yarn add @nikala-ui/folio
 ```
 
 ## Initialize a project
@@ -49,16 +51,16 @@ Run the initializer from the project directory:
 
 ```bash
 # Bun
-bunx @nikala-ui/docs init .
+bunx @nikala-ui/folio init .
 
 # pnpm
-pnpm dlx @nikala-ui/docs init .
+pnpm dlx @nikala-ui/folio init .
 
 # npm
-npx @nikala-ui/docs init .
+npx @nikala-ui/folio init .
 
 # yarn
-yarn dlx @nikala-ui/docs init .
+yarn dlx @nikala-ui/folio init .
 ```
 
 The initializer creates the documentation structure, prepares the default
@@ -107,9 +109,9 @@ The default development server runs at `http://localhost:1862/`.
 The CLI commands can also be run directly:
 
 ```bash
-bunx @nikala-ui/docs dev
-bunx @nikala-ui/docs build
-bunx @nikala-ui/docs preview
+bunx @nikala-ui/folio dev
+bunx @nikala-ui/folio build
+bunx @nikala-ui/folio preview
 ```
 
 ## Content structure
@@ -151,7 +153,7 @@ Supported page metadata includes `title`, `description`, `order`,
 Create `docs.config.ts` in the project root:
 
 ```ts
-import type { DocsConfig } from "@nikala-ui/docs";
+import type { DocsConfig } from "@nikala-ui/folio";
 
 const config: DocsConfig = {
   title: "Project Documentation",
@@ -194,8 +196,8 @@ typography, spacing, and other visual properties.
 Clone the repository and install its dependencies:
 
 ```bash
-git clone https://github.com/nikala-ui/docs-engine.git
-cd docs-engine
+git clone https://github.com/nikala-ui/folio.git
+cd folio
 bun install
 ```
 
