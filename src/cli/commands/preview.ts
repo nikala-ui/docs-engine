@@ -1,6 +1,7 @@
 // packages/docs/src/cli/commands/preview.ts
 import pc from "picocolors";
 import { previewDocs } from "../../server/index.js";
+import { FOLIO_VERSION } from "../../version.js";
 
 export interface PreviewCommandOptions {
   port?: string;
@@ -14,7 +15,7 @@ export async function runPreviewCommand(dir = "docs", options: PreviewCommandOpt
   const outDir = options.outDir || "dist";
 
   console.log();
-  console.log(pc.bold(pc.cyan("  Folio ")) + pc.dim("v0.12.2"));
+  console.log(pc.bold(pc.cyan("  Folio ")) + pc.dim(`v${FOLIO_VERSION}`));
   console.log(pc.dim(`  Previewing production build from ${pc.bold(outDir)}...`));
   console.log();
 

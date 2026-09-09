@@ -1,6 +1,6 @@
 {
   "name": "@nikala-ui/folio",
-  "version": "0.12.2",
+  "version": "0.13.0",
   "description": "Zero-config, fast, and elegant documentation engine for SolidJS, built on Nikala UI and Tailwind CSS v4",
   "type": "module",
   "main": "./dist/index.js",
@@ -47,6 +47,7 @@
     "test:generated": "bun tests/generated-project.smoke.ts",
     "package:check": "bun run build && bun scripts/check-package.ts",
     "bundle:check": "bun run docs:build && bun scripts/check-bundle.ts",
+    "bump": "bun scripts/bump.ts",
     "build": "bun scripts/build.ts",
     "docs:dev": "bun run build && bun dist/cli/index.js dev",
     "docs:build": "bun run build && bun dist/cli/index.js build -o .docs-dist",

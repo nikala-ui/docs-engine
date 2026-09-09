@@ -5,13 +5,14 @@ import { runBuildCommand } from "./commands/build.js";
 import { runPreviewCommand } from "./commands/preview.js";
 import { runInitCommand } from "./commands/init.js";
 import { runServeCommand } from "./commands/serve.js";
+import { FOLIO_VERSION } from "../version.js";
 
 const program = new Command();
 
 program
   .name("@nikala-ui/folio")
   .description("Zero-config, fast, and elegant documentation engine for SolidJS")
-  .version("0.12.2");
+  .version(FOLIO_VERSION);
 
 program
   .command("dev [dir]")
