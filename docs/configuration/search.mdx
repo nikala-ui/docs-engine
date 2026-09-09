@@ -1,44 +1,92 @@
 ---
 title: Search
-description: Configure the documentation search trigger and provider.
+description: Configure local search or connect an external search adapter.
 order: 5
 ---
 
-Local search is enabled by default and is the built-in provider:
+## Local search
+
+Folio uses local search by default. It searches the generated page catalog by
+title, URL, and description without requiring an external service:
 
 ```ts
 export default {
   search: {
-    enabled: true,
     provider: "local",
   },
 };
 ```
 
 Set `enabled: false` to remove the search trigger and disable the default
-theme's keyboard shortcut.
-
-The default theme implements `local`, which searches page titles, URLs, and
-descriptions. External integrations provide a `SearchAdapter` through the
-configuration instead of requiring provider-specific code in Folio:
+theme's keyboard shortcut:
 
 ```ts
-import type { SearchAdapter } from "@nikala-ui/folio";
-
-const adapter: SearchAdapter = {
-  name: "my-search",
-  async search({ query, pages }) {
-    return pages.filter((page) => page.title.toLowerCase().includes(query.toLowerCase()));
-  },
-};
-
 export default {
   search: {
-    provider: adapter.name,
-    adapter,
+    enabled: false,
   },
 };
 ```
 
-If a provider name is configured without an adapter, the engine safely falls
-back to the built-in local implementation.
+## External search adapter
+
+External search integrations are published as separate adapter packages. The
+adapter package owns the provider client and search implementation; the site
+configuration only creates the adapter and selects it as the provider:
+
+```ts
+import { createAlgoliaAdapter } from "@nikala-ui/folio-algolia";
+
+const algoliaAdapter = createAlgoliaAdapter({
+  appId: import.meta.env.PUBLIC_ALGOLIA_APP_ID,
+  apiKey: import.meta.env.PUBLIC_ALGOLIA_SEARCH_KEY,
+  indexName: import.meta.env.PUBLIC_ALGOLIA_INDEX,
+});
+
+export default {
+  search: {
+    provider: algoliaAdapter,
+  },
+};
+```
+
+The `provider` value is the adapter instance returned by the integration
+factory. Do not copy the provider's request, ranking, or response-mapping
+logic into the site configuration. See [Search adapters](/contributing/search-adapters)
+for the package authoring contract.
+
+## Provider options
+
+The exact options depend on the adapter package. Common options include:
+
+- `appId` — the provider application identifier;
+- `apiKey` — a public browser-safe search key;
+- `indexName` — the index containing the documentation pages;
+- `endpoint` or `region` — an optional provider location;
+- `filters` — optional provider-specific filtering rules;
+- `locale` — optional language or locale configuration;
+- `limit` — the maximum number of returned results.
+
+Use the option names and types documented by the selected adapter package.
+Do not add provider-specific options to Folio's core configuration contract.
+
+## Environment variables and security
+
+Keep provider values in environment variables or the deployment platform's
+configuration. A public search key may be included in the browser bundle when
+the provider requires it. Administrative keys, indexing keys, and private
+credentials must never be exposed to the browser.
+
+Index creation and record management belong to a separate server-side or CI
+process. The browser adapter should only perform the provider's public search
+operation.
+
+## Fallback behavior
+
+If no external adapter is selected, Folio uses local search. If an external
+provider cannot be resolved or returns an unavailable result, the engine keeps
+the search interface functional by falling back to its local implementation
+when the local catalog is available.
+
+External adapters should still handle network failures, malformed responses,
+rate limits, and stale requests according to their own documented behavior.
