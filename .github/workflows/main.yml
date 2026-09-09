@@ -65,3 +65,32 @@ jobs:
           path: .artifacts/nikala-ui-docs.tgz
           if-no-files-found: error
           retention-days: 14
+
+  netlify-production:
+    name: Netlify production deploy
+    needs: full-quality
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+      NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+
+    steps:
+      - name: Download documentation artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: docs-dist
+          path: .docs-dist
+
+      - name: Deploy production site when Netlify credentials are configured
+        run: |
+          if [ -z "$NETLIFY_AUTH_TOKEN" ] || [ -z "$NETLIFY_SITE_ID" ]; then
+            echo "Netlify production deploy skipped: repository secrets are not configured."
+            exit 0
+          fi
+          npx --yes netlify-cli@17.36.1 deploy \
+            --dir=.docs-dist \
+            --site="$NETLIFY_SITE_ID" \
+            --auth="$NETLIFY_AUTH_TOKEN" \
+            --prod
