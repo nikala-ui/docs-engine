@@ -1,0 +1,29 @@
+---
+title: Page actions
+description: Configure page copying, Markdown export, and AI assistant links.
+order: 6
+---
+
+Page copy actions are enabled in the default theme. `Copy as Markdown` uses
+the page's original MDX source without rendered navigation or component
+controls.
+
+AI providers use URL and prompt templates. The `{url}`, `{content}`, and
+`{title}` placeholders are available in prompts and are URL-encoded when
+inserted into an action URL:
+
+```ts
+export default {
+  pageActions: {
+    copyPage: true,
+    copyMarkdown: true,
+    ai: [
+      {
+        name: "ChatGPT",
+        url: "https://chatgpt.com/?q={prompt}",
+        prompt: "You are my documentation companion. I’m reading ‘{title}’ at {url}. Teach me how to use this page in a practical way: explain the core idea, show an idiomatic example, point out common mistakes, and help debug problems using the documented APIs and conventions.",
+      },
+    ],
+  },
+};
+```

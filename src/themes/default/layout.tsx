@@ -96,7 +96,7 @@ export const DocsLayout: ParentComponent<DocsLayoutProps> = (props) => {
   const sidebar = (className?: string) => (
     <DocsSidebar
       tree={local.tree}
-      nav={local.config.nav}
+      nav={local.config.navigation?.navbar || local.config.nav}
       currentUrl={currentUrl()}
       title={local.config.title}
       logo={local.config.logo}
@@ -223,8 +223,8 @@ export const DocsLayout: ParentComponent<DocsLayoutProps> = (props) => {
     <SidebarProvider defaultOpen={true} class="min-h-screen w-full items-stretch">
       <Show when={landingPage()} fallback={<Show when={sidebarLayout()} fallback={
         <div class="flex min-h-screen min-w-0 flex-1 flex-col">
-          <DocsNavbar config={local.config} showBrand={true} onOpenSearch={() => setSearchOpen(true)} />
-          <div class="flex min-h-0 min-w-0 max-w-full flex-1 items-start">{sidebar()}{content()}</div>
+          <DocsNavbar config={local.config} showBrand={true} showSidebarTrigger={false} onOpenSearch={() => setSearchOpen(true)} />
+          <div class="flex min-h-0 min-w-0 max-w-full flex-1 items-start">{content()}</div>
         </div>
       }>
         {sidebar()}

@@ -233,8 +233,7 @@ async function writeProjectFiles(root: string, registryDependencies: string[]): 
   css: "src/index.css",
   home: { layout: "landing", showSidebar: false, showNavbar: true, showBreadcrumbs: false, showToc: false, showPager: false },
   theme: { path: "./src/themes/default" },
-  nav: [{ title: "Home", href: "/" }],
-  navigation: { layout: "sidebar", sidebar: { header: true, footer: false, headerSubtitle: "Documentation", footerText: "Documentation" } },
+  navigation: { layout: "sidebar", navbar: [{ title: "Home", href: "/" }], sidebar: { nav: "auto", header: true, footer: false, headerSubtitle: "Documentation", footerText: "Documentation" } },
   search: { enabled: true },
 };
 `, "utf-8");

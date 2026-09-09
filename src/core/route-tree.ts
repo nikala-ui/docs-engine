@@ -160,6 +160,31 @@ export function buildSidebarTree(pages: PageData[], directories: string[] = []):
   return rootItems;
 }
 
+/**
+ * Build a sidebar from an explicit configuration while validating every page
+ * link against the scanned documentation routes.
+ */
+export function buildConfiguredSidebarTree(items: SidebarItem[], pages: PageData[]): SidebarItem[] {
+  const pageUrls = new Set(pages.map((page) => page.url));
+
+  const visit = (entries: SidebarItem[], parentPath: string): SidebarItem[] => entries.map((item, index) => {
+    const location = parentPath ? `${parentPath}.${index}` : `${index}`;
+    const href = item.href?.trim();
+    if (href && (!href.startsWith("/") || !pageUrls.has(href))) {
+      throw new Error(`Invalid sidebar link at sidebar[${location}]: ${item.href}`);
+    }
+
+    const children = item.items ? visit(item.items, `${location}.items`) : undefined;
+    return {
+      ...item,
+      href: href || undefined,
+      items: children,
+    };
+  });
+
+  return visit(items, "");
+}
+
 export function buildPagination(
   pages: PageData[],
   currentUrl: string

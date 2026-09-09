@@ -2,6 +2,7 @@
 import { describe, expect, test } from "bun:test";
 import {
   buildBreadcrumbs,
+  buildConfiguredSidebarTree,
   buildPagination,
   buildSidebarTree,
   flattenSidebarItems,
@@ -123,6 +124,25 @@ describe("route-tree", () => {
       const lastPage = buildPagination(mockPages, "/components/dialog");
       expect(lastPage.prev).toEqual({ title: "Button", href: "/components/button" });
       expect(lastPage.next).toBeUndefined();
+    });
+  });
+
+  describe("buildConfiguredSidebarTree", () => {
+    test("preserves explicitly configured groups and page order", () => {
+      const tree = buildConfiguredSidebarTree([
+        { title: "Getting Started", href: "/getting-started/installation" },
+        { title: "Components", items: [{ title: "Dialog", href: "/components/dialog" }] },
+      ], mockPages);
+
+      expect(tree).toEqual([
+        { title: "Getting Started", href: "/getting-started/installation", items: undefined },
+        { title: "Components", href: undefined, items: [{ title: "Dialog", href: "/components/dialog", items: undefined }] },
+      ]);
+    });
+
+    test("rejects missing or external page links", () => {
+      expect(() => buildConfiguredSidebarTree([{ title: "Missing", href: "/missing" }], mockPages)).toThrow("Invalid sidebar link");
+      expect(() => buildConfiguredSidebarTree([{ title: "External", href: "https://example.com" }], mockPages)).toThrow("Invalid sidebar link");
     });
   });
 

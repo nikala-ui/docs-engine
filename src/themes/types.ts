@@ -1,5 +1,5 @@
 import type { Component, JSX, ParentComponent } from "solid-js";
-import type { DocsConfig, PageData, TocItem, SidebarItem } from "../types.js";
+import type { DocsConfig, NavItem, PageData, TocItem, SidebarItem } from "../types.js";
 import type { BuiltInSearchProvider } from "../search/provider.js";
 
 export type BreadcrumbItemData = { title: string; href?: string };
@@ -15,7 +15,7 @@ export interface DocsNavbarProps {
 
 export interface DocsSidebarProps {
   tree: SidebarItem[];
-  nav?: DocsConfig["nav"];
+  nav?: NavItem[];
   currentUrl?: string;
   title?: string;
   logo?: DocsConfig["logo"];

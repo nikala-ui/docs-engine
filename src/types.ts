@@ -64,7 +64,10 @@ export type DocsNavigationLayout = "sidebar" | "top";
 export interface DocsNavigationConfig {
   /** Keep the navbar beside the sidebar or place it above the full layout. */
   layout?: DocsNavigationLayout;
+  navbar?: NavItem[];
   sidebar?: {
+    /** Explicit sidebar tree. Omit this or use "auto" for filesystem navigation. */
+    nav?: SidebarItem[] | "auto";
     header?: boolean;
     footer?: boolean;
     headerSubtitle?: string;
@@ -124,7 +127,9 @@ export interface DocsConfig {
     rootDir?: string;
   };
   pageActions?: DocsPageActionsConfig;
+  /** @deprecated Use navigation.navbar instead. */
   nav?: NavItem[];
+  /** @deprecated Use navigation.sidebar.nav instead. */
   sidebar?: SidebarItem[] | "auto";
   navigation?: DocsNavigationConfig;
   theme?: DocsThemeConfig;

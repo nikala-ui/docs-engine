@@ -1,0 +1,22 @@
+---
+title: Syntax highlighting
+description: Configure Shiki themes and the language allowlist.
+order: 4
+---
+
+```ts
+export default {
+  shiki: {
+    themes: {
+      light: "github-light",
+      dark: "github-dark",
+    },
+    langs: ["typescript", "tsx", "javascript", "jsx", "json", "css"],
+  },
+};
+```
+
+Only languages listed in `shiki.langs` are enabled for highlighting. They are
+loaded on demand, while unsupported or unlisted languages safely render as
+plain text. Keep the list limited to formats used by the site so production
+bundles stay small.

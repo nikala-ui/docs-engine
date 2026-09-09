@@ -47,9 +47,9 @@ export const DocsNavbar: Component<DocsNavbarProps> = (props) => {
               <span>{logoText()}</span>
             </NavbarBrand>
           </Show>
-          <Show when={local.config.nav?.length}>
+          <Show when={(local.config.navigation?.navbar || local.config.nav)?.length}>
             <NavbarContent justify="start" class="hidden min-w-0 flex-1 gap-1 overflow-hidden px-1 md:flex">
-              <For each={local.config.nav}>
+              <For each={local.config.navigation?.navbar || local.config.nav}>
                 {(item) => (
                   <NavbarItem>
                     <a

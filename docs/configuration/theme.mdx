@@ -1,0 +1,25 @@
+---
+title: Themes and CSS
+description: Configure the default theme mode and consumer-owned CSS tokens.
+order: 3
+---
+
+The default theme is bundled with the engine. A custom theme path can replace
+it:
+
+```ts
+export default {
+  theme: {
+    path: "./src/themes/default",
+    defaultMode: "system",
+  },
+};
+```
+
+`theme.defaultMode` accepts `"light"`, `"dark"`, or `"system"`. A mode saved
+by the visitor in local storage takes precedence.
+
+Use `css` to add a consumer-owned Tailwind CSS entrypoint. Keep custom colors
+and layout values in semantic design tokens rather than hardcoding them in
+theme components. Page icons use Lucide Icons in the default theme; pages
+without an `icon` field render without an icon.

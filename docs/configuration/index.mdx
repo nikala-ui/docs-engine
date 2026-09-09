@@ -1,0 +1,38 @@
+---
+title: Configuration
+description: Configure site metadata, navigation, themes, search, and syntax highlighting.
+icon: cog
+order: 3
+---
+
+Nikala Docs Engine loads a TypeScript configuration file from the project root.
+The preferred filename is `docs.config.ts`:
+
+```ts
+import type { DocsConfig } from "@nikala-ui/docs";
+
+const config: DocsConfig = {
+  title: "Project Documentation",
+  description: "Documentation for my project.",
+  contentDir: "docs",
+  favicon: "/favicon.ico",
+};
+
+export default config;
+```
+
+The loader also accepts JavaScript and legacy `nikala.config.*` filenames.
+Configuration values are merged with the engine defaults. Nested `theme`,
+`navigation.sidebar`, `shiki`, and `search` values are merged as well.
+
+Use the topic pages in this section for the complete configuration reference:
+
+- [Site metadata](./site)
+- [Navigation and sidebar](./navigation)
+- [Themes and CSS](./theme)
+- [Syntax highlighting](./code-highlighting)
+- [Search](./search)
+- [Page actions](./page-actions)
+
+Keep site-specific values in `docs.config.ts`. Do not hardcode paths or
+branding in engine source.

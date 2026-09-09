@@ -1,0 +1,110 @@
+---
+title: Navigation and sidebar
+description: Configure the navbar, automatic filesystem navigation, and explicit sidebar trees.
+order: 2
+addedAt: 2026-09-05
+---
+
+## Layout
+
+The default layout is the sidebar layout:
+
+```ts
+export default {
+  navigation: {
+    layout: "sidebar",
+    navbar: [
+      { title: "Home", href: "/" },
+      { title: "API", href: "/api" },
+    ],
+    sidebar: {
+      nav: "auto",
+      header: true,
+      footer: false,
+      headerSubtitle: "Developer Documentation",
+      footerText: "Project Docs",
+    },
+  },
+};
+```
+
+Set `layout: "top"` to place navigation above the content without the
+desktop sidebar.
+
+## Automatic sidebar
+
+The default `navigation.sidebar.nav: "auto"` mode is filesystem-based. Directories become
+categories, pages are ordered by frontmatter, and an `index.mdx` file acts as
+the category overview. Page metadata can add icons and badges:
+
+```mdx
+---
+title: Installation
+order: 1
+categoryOrder: 1
+icon: package
+badge: New
+addedAt: 2026-09-05
+toc: true
+prev: /getting-started
+next: /configuration
+---
+```
+
+Set `addedAt` to the page's publication date in `YYYY-MM-DD` format. The
+default theme uses this metadata to mark recent pages with a small indicator
+in the sidebar, making newly added documentation easier to spot.
+
+The frontmatter fields in the example are:
+
+- `title`: The page title shown in headings, navigation, and the document title.
+- `order`: The page order within its directory or category.
+- `categoryOrder` (optional): The category order when the page belongs to a directory.
+- `icon` (optional): The Lucide icon name shown beside the page in the sidebar.
+- `badge` (optional): A short label displayed with the page in navigation.
+- `addedAt` (optional): The publication date used for the recent-page indicator.
+- `toc` (optional): Enables the page's “On this page” table of contents when set to `true`.
+- `prev` (optional): The route of the previous page in the documentation flow.
+- `next` (optional): The route of the next page in the documentation flow.
+
+## Explicit sidebar
+
+Use an explicit tree when the displayed order or grouping should differ from
+the filesystem:
+
+```ts
+export default {
+  navigation: {
+    sidebar: {
+      nav: [
+        { title: "Getting Started", href: "/getting-started" },
+        {
+          title: "Themes",
+          items: [
+            { title: "Colors", href: "/themes/colors" },
+          ],
+        },
+      ],
+    },
+  },
+};
+```
+
+Every `href` must point to an existing internal documentation route. Invalid
+or external sidebar links fail the build with a clear configuration error.
+Omit `navigation.sidebar.nav`, or set it to `"auto"`, to return to filesystem
+navigation.
+
+## Top navigation links
+
+```ts
+export default {
+  navigation: {
+    navbar: [
+      { title: "Home", href: "/" },
+      { title: "API", href: "/api" },
+      { title: "Source", href: "https://github.com/example/project", external: true },
+    ],
+  },
+};
+```

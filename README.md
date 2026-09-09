@@ -159,10 +159,11 @@ const config: DocsConfig = {
   siteUrl: "https://docs.example.com",
   contentDir: "docs",
   favicon: "/favicon.ico",
-  nav: [{ title: "Home", href: "/" }],
   navigation: {
     layout: "sidebar",
+    navbar: [{ title: "Home", href: "/" }],
     sidebar: {
+      nav: "auto",
       header: true,
       footer: false,
       headerSubtitle: "Documentation",

@@ -29,15 +29,16 @@ const config: DocsConfig = {
       },
     ],
   },
-  nav: [
-    { title: "Home", href: "/" },
-    { title: "Getting Started", href: "/getting-started" },
-    { title: "Configuration", href: "/configuration" },
-    { title: "Contributing", href: "/contributing" },
-  ],
   navigation: {
     layout: "sidebar",
+    navbar: [
+      { title: "Home", href: "/" },
+      { title: "Getting Started", href: "/getting-started" },
+      { title: "Configuration", href: "/configuration" },
+      { title: "Contributing", href: "/contributing" },
+    ],
     sidebar: {
+      nav: "auto",
       header: true,
       footer: false,
       headerSubtitle: "Documentation Engine",

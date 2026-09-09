@@ -1,0 +1,22 @@
+---
+title: Search
+description: Configure the documentation search trigger and provider.
+order: 5
+---
+
+Local search is enabled by default and is the built-in provider:
+
+```ts
+export default {
+  search: {
+    enabled: true,
+    provider: "local",
+  },
+};
+```
+
+Set `enabled: false` to remove the search trigger from the default theme.
+The default theme currently implements `local`. If `pagefind`, `orama`, or
+`algolia` is selected before a corresponding integration is installed, the
+engine safely falls back to local search. Those providers are reserved for
+future index adapters.

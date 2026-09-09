@@ -4,7 +4,7 @@ import { createRequire } from "node:module";
 import fs from "fs-extra";
 import type { Plugin, ViteDevServer } from "vite";
 import { scanContent, scanContentDirectories } from "../core/content-scanner.js";
-import { buildSidebarTree } from "../core/route-tree.js";
+import { buildConfiguredSidebarTree, buildSidebarTree } from "../core/route-tree.js";
 import { compileMdx } from "../mdx/compiler.js";
 import { loadConfig } from "../config.js";
 import { resolveDefaultThemeMode } from "../theme-mode.js";
@@ -281,7 +281,10 @@ export default config;
       if (id === RESOLVED_TREE_ID) {
         cachedPages = await scanContent(docsDir);
         const directories = await scanContentDirectories(docsDir);
-        const tree = buildSidebarTree(cachedPages, directories);
+        const configuredSidebar = resolvedConfig.navigation?.sidebar?.nav ?? resolvedConfig.sidebar ?? "auto";
+        const tree = configuredSidebar !== "auto"
+          ? buildConfiguredSidebarTree(configuredSidebar, cachedPages)
+          : buildSidebarTree(cachedPages, directories);
         return `
 export const pages = ${JSON.stringify(cachedPages)};
 export const tree = ${JSON.stringify(tree)};

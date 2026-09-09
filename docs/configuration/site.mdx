@@ -1,0 +1,49 @@
+---
+title: Site metadata
+description: Configure the title, description, logo, favicon, repository, and CSS entrypoint.
+order: 1
+---
+
+```ts
+export default {
+  title: "Project Documentation",
+  description: "Reference and guides for the project.",
+  siteUrl: "https://docs.example.com",
+  favicon: "/favicon.ico",
+  contentDir: "docs",
+  css: "src/index.css",
+  logo: {
+    text: "Project Docs",
+    image: "/logo.svg",
+    href: "/",
+  },
+};
+```
+
+- `title` is used in the navbar and browser titles.
+- `description` is the fallback description for pages without frontmatter.
+- `siteUrl` enables canonical URLs in generated HTML.
+- `favicon` sets the favicon path or URL.
+- `contentDir` selects the MDX directory. The default is `docs`.
+- `css` points to a consumer-owned CSS entrypoint.
+- `logo.image` is served from the consumer project's public assets.
+
+## Repository source links
+
+When `repository` is configured, the default theme adds a `View source` link
+to each documentation page:
+
+```ts
+export default {
+  repository: {
+    url: "https://github.com/example/project",
+    branch: "main",
+    rootDir: "",
+  },
+};
+```
+
+`branch` defaults to `main`. Set `rootDir` when the documentation project is
+nested inside the repository, for example `"apps/docs"`. The configured
+`contentDir` is appended automatically. GitHub, GitLab, and Bitbucket URLs are
+supported.
