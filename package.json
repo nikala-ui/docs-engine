@@ -90,6 +90,6 @@
     "playwright": "1.62.1",
     "solid-js": "^1.9.14",
     "tailwindcss": "^4.0.7",
-    "typescript": "^5.7.2"
+    "typescript": "^7.0.2"
   }
 }
