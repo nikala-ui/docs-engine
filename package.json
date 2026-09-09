@@ -87,7 +87,7 @@
   "devDependencies": {
     "@types/fs-extra": "^11.0.4",
     "@types/node": "^26.1.1",
-    "playwright": "1.62.1",
+    "playwright": "1.63.0",
     "solid-js": "^1.9.14",
     "tailwindcss": "^4.0.7",
     "typescript": "^5.7.2"
