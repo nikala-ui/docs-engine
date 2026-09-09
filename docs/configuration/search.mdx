@@ -4,6 +4,9 @@ description: Configure local search or connect an external search adapter.
 order: 5
 ---
 
+This page covers the core `search` configuration. For the complete Algolia
+setup, see [Algolia search](/search/algolia).
+
 ## Local search
 
 Folio uses local search by default. It searches the generated page catalog by
@@ -52,8 +55,9 @@ export default {
 
 The `provider` value is the adapter instance returned by the integration
 factory. Do not copy the provider's request, ranking, or response-mapping
-logic into the site configuration. See [Search adapters](/contributing/search-adapters)
-for the package authoring contract.
+logic into the site configuration. See [Algolia search](/search/algolia) for
+the consumer setup and [Search adapters](/contributing/search-adapters) for
+the package authoring contract.
 
 ## Provider options
 

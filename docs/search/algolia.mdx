@@ -1,0 +1,161 @@
+---
+title: Algolia
+description: Add Algolia-powered search to a Folio documentation site.
+order: 1
+---
+
+The official Algolia integration is published as
+`@nikala-ui/folio-algolia`. It connects Folio's search contract to an Algolia
+index and maps remote hits back to pages that exist in the current site.
+
+## Requirements
+
+- Folio `0.13.2` or newer;
+- an Algolia application and index;
+- an Algolia Search-Only API key;
+- records in the index that use the Folio page URL as `objectID`.
+
+Never expose an Algolia Admin API key or any key that can create, update, or
+delete records in a browser application.
+
+## Install the adapter
+
+Install the adapter in the Folio project, alongside Folio itself:
+
+```bash
+bun add @nikala-ui/folio @nikala-ui/folio-algolia
+```
+
+The package can also be installed with npm, pnpm, or yarn.
+
+## Configure environment variables
+
+Create a `.env` file in the consuming documentation project. Do not put these
+values in the adapter package or commit the file:
+
+```bash
+VITE_ALGOLIA_APP_ID=your_application_id
+VITE_ALGOLIA_SEARCH_KEY=your_search_only_key
+VITE_ALGOLIA_INDEX=your_index_name
+```
+
+The adapter also recognizes the equivalent runtime names
+`ALGOLIA_APP_ID`, `ALGOLIA_SEARCH_KEY`, and `ALGOLIA_INDEX`. The `VITE_*`
+names are useful when the configuration is evaluated by Vite and the browser
+needs the public values.
+
+The application ID, index name, and Search-Only key are intentionally public.
+An Admin API key is not public and must only be used by a trusted indexing
+process.
+
+## Select the provider
+
+Keep the site configuration small. Import the adapter package and select its
+exported adapter instance:
+
+```ts
+import { algoliaAdapter } from "@nikala-ui/folio-algolia";
+
+export default {
+  search: {
+    enabled: true,
+    provider: algoliaAdapter,
+  },
+};
+```
+
+The configuration does not contain Algolia requests, ranking logic, response
+mapping, or indexing code. Those responsibilities belong to the adapter and
+the indexing process.
+
+## Build the index
+
+The adapter package does not crawl documentation or upload records. Indexing
+must run separately with a trusted server or CI job that has an Algolia Admin
+API key.
+
+Use `toAlgoliaRecord` to preserve the page data needed by Folio:
+
+```ts
+import { toAlgoliaRecord } from "@nikala-ui/folio-algolia";
+
+const record = toAlgoliaRecord(page);
+```
+
+Each record contains:
+
+- `objectID` — the stable Folio page URL;
+- `slug` and `url` — route identifiers;
+- `title` and `description` — searchable page metadata;
+- `metadata` — the page frontmatter;
+- `headings` — table-of-contents text from the page.
+
+The `page` value must be a Folio page record. Keep the indexing script in the
+consumer project or in a separate private indexing service; never ship Admin
+credentials to the browser.
+
+## Alternative factory setup
+
+Most projects should use the exported `algoliaAdapter` instance. If the
+credentials come from another runtime configuration system, create the
+adapter explicitly:
+
+```ts
+import { createAlgoliaAdapter } from "@nikala-ui/folio-algolia";
+
+const provider = createAlgoliaAdapter({
+  appId: "your_application_id",
+  apiKey: "your_search_only_key",
+  indexName: "your_index_name",
+});
+
+export default {
+  search: {
+    provider,
+  },
+};
+```
+
+## Verify locally
+
+Start the documentation site and open the search dialog. Search for a word
+that appears in an indexed page title or heading:
+
+```bash
+bun run dev
+```
+
+In the browser's Network panel, the query should be sent to Algolia's search
+endpoint. A successful result should navigate to a page that exists in the
+current Folio page catalog. Hits from another site or stale records are
+ignored.
+
+An empty query does not make a network request and returns the current page
+catalog. If the remote request fails, Folio can keep the local catalog
+available as a fallback when local search data exists.
+
+## Troubleshooting
+
+### The adapter is not selected
+
+Confirm that `docs.config.ts` imports `algoliaAdapter` from
+`@nikala-ui/folio-algolia` and assigns it to `search.provider`. Installing
+the package alone does not change Folio's provider.
+
+### Required environment variable is missing
+
+Confirm that `.env` is in the documentation project root, the variable names
+are spelled correctly, and the dev server was restarted after changing the
+file.
+
+### Algolia returns no matching pages
+
+Confirm that the index contains the same URL values used by Folio as
+`objectID`, `url`, or `slug`. The adapter filters results against the
+current site's page catalog, so unrelated records are deliberately removed.
+
+### The request is rejected
+
+Check the application ID, index name, and Search-Only key. Also verify that
+the key is allowed to search the selected index and that the browser is not
+using an Admin key.
