@@ -208,6 +208,7 @@ async function copyCustomTheme(root: string): Promise<void> {
       .replace(/from "\.\.\/\.\.\/client\/page-actions\.js"/g, 'from "./runtime/page-actions.js"')
       .replace(/from "\.\.\/\.\.\/navigation\/repository-links\.js"/g, 'from "./runtime/repository-links.js"')
       .replace(/from "\.\.\/\.\.\/search\/provider\.js"/g, 'from "./runtime/search-provider.js"')
+      .replace(/from "\.\.\/\.\.\/\.\.\/search\/provider\.js"/g, 'from "../runtime/search-provider.js"')
       .replace(/from "\.\.\/\.\.\/\.\.\/navigation\/sidebar-state\.js"/g, 'from "./sidebar-state.js"')
       .replace(/from "(?:\.\.\/)+types\.js"/g, 'from "@nikala-ui/folio"')
       .replace(/from "(\.\.\/|\.\/)[^"]+\.(?:jsx|tsx|js)"/g, (match) => match.replace(/\.(?:jsx|tsx|js)"$/, '"'))
