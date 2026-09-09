@@ -191,6 +191,7 @@ async function copyCustomTheme(root: string): Promise<void> {
     const destination = path.join(target, relative);
     let content = await fs.readFile(sourceFile, "utf-8");
     content = content
+      .replace(/\s*\/\/[#@]\s*sourceMappingURL=.*$/gm, "")
       .replace(/from "@nikala-ui\/core\/ui\//g, 'from "@/components/ui/')
       .replace(/from "@nikala-ui\/core"/g, 'from "@/components/ui"')
       .replace(/from "@nikala-ui\/hooks"/g, 'from "@/hooks"')
