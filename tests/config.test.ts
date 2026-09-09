@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { resolveDefaultThemeMode } from "../src/theme-mode.js";
-import { resolveSearchProvider } from "../src/search/provider.js";
+import { resolveSearchProvider, searchPages } from "../src/search/provider.js";
 
 describe("docs config", () => {
   test("uses the configured default theme mode", () => {
@@ -25,5 +25,15 @@ describe("docs config", () => {
     expect(resolved.requested).toBe("algolia");
     expect(resolved.active).toBe("local");
     expect(resolved.fallback).toBe(true);
+  });
+
+  test("uses the resolved provider implementation for local search", () => {
+    const pages = [
+      { title: "Configuration", url: "/configuration", description: "Configure Folio" },
+      { title: "Themes", url: "/themes", description: "Customize styles" },
+    ] as never[];
+
+    expect(searchPages(resolveSearchProvider({ provider: "local" }), "folio", pages)).toHaveLength(1);
+    expect(searchPages(resolveSearchProvider({ provider: "algolia" }), "styles", pages)).toHaveLength(1);
   });
 });

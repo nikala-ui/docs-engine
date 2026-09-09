@@ -8,6 +8,7 @@ import { CommandGroup } from "@/components/ui/command";
 import { CommandItem } from "@/components/ui/command";
 import { FileText } from "lucide-solid";
 import type { DocsSearchDialogProps } from "../../types.js";
+import { resolveSearchProvider, searchPages } from "../../../search/provider.js";
 
 export const DocsSearchDialog: Component<DocsSearchDialogProps> = (props) => {
   const handleOpenChange = (open: boolean) => {
@@ -33,15 +34,12 @@ export const DocsSearchDialog: Component<DocsSearchDialogProps> = (props) => {
           document.querySelector<HTMLInputElement>("#docs-search-input")?.focus();
         });
       }}
-      enableHotkey={true}
+      enableHotkey={props.provider !== undefined}
     >
       {({ search }) => {
-        const query = () => search().trim().toLowerCase();
-        const filteredPages = () => (props.pages || []).filter((page) =>
-          !query() || [page.title, page.url, page.description]
-            .filter(Boolean)
-            .some((value) => value!.toLowerCase().includes(query()))
-        );
+        const query = () => search().trim();
+        const resolvedProvider = () => resolveSearchProvider({ provider: props.provider });
+        const filteredPages = () => searchPages(resolvedProvider(), query(), props.pages || []);
 
         return (
           <>

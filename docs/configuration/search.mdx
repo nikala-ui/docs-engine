@@ -15,8 +15,11 @@ export default {
 };
 ```
 
-Set `enabled: false` to remove the search trigger from the default theme.
-The default theme currently implements `local`. If `pagefind`, `orama`, or
-`algolia` is selected before a corresponding integration is installed, the
-engine safely falls back to local search. Those providers are reserved for
-future index adapters.
+Set `enabled: false` to remove the search trigger and disable the default
+theme's keyboard shortcut.
+
+The default theme implements `local`, which searches page titles, URLs, and
+descriptions. If `pagefind`, `orama`, or `algolia` is selected before a
+corresponding integration is installed, the engine safely falls back to the
+local implementation while preserving the requested provider in the resolved
+configuration.
