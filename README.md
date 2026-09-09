@@ -2,6 +2,11 @@
 
 ![Folio documentation site](.github/assets/screenshot.png)
 
+[![CI](https://github.com/nikala-ui/folio/actions/workflows/main.yml/badge.svg?branch=main)](https://github.com/nikala-ui/folio/actions/workflows/main.yml)
+[![npm version](https://img.shields.io/npm/v/%40nikala-ui%2Ffolio)](https://www.npmjs.com/package/@nikala-ui/folio)
+[![npm downloads](https://img.shields.io/npm/dm/%40nikala-ui%2Ffolio)](https://www.npmjs.com/package/@nikala-ui/folio)
+[![License](https://img.shields.io/github/license/nikala-ui/folio)](https://github.com/nikala-ui/folio/blob/main/LICENSE)
+
 `@nikala-ui/folio` is a file-based documentation engine for SolidJS projects.
 It compiles MDX content with Vite, renders server-side pages, and provides a
 responsive documentation theme with navigation, search, syntax highlighting,
