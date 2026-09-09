@@ -24,6 +24,16 @@ async function listSourceFiles(dir: string): Promise<string[]> {
   return result;
 }
 
+async function stripSourceMapComments(dir: string): Promise<void> {
+  if (!(await fs.pathExists(dir))) return;
+  for (const sourceFile of await listSourceFiles(dir)) {
+    if (!/\.(?:d\.ts|[cm]?[jt]sx?)$/.test(sourceFile)) continue;
+    const content = await fs.readFile(sourceFile, "utf-8");
+    const cleaned = content.replace(/\s*\/\/[#@]\s*sourceMappingURL=.*$/gm, "");
+    if (cleaned !== content) await fs.writeFile(sourceFile, cleaned, "utf-8");
+  }
+}
+
 async function resolveRegistryDir(): Promise<string> {
   const commandDir = path.dirname(fileURLToPath(import.meta.url));
   const bundledRegistry = path.resolve(commandDir, "../../registry");
@@ -229,6 +239,10 @@ async function copyCustomTheme(root: string): Promise<void> {
       .replace(/from "\.\.\/types\.js"/g, 'from "@nikala-ui/folio"');
     await fs.outputFile(path.join(target, "navigation/sidebar-state.ts"), navigationContent, "utf-8");
   }
+
+  // Remove stale references left by older generated themes so upgrading and
+  // re-running init is enough to silence Vite's missing-map warnings.
+  await stripSourceMapComments(target);
 }
 
 async function copyDefaultAssets(root: string): Promise<void> {
