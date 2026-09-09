@@ -1,6 +1,7 @@
 // packages/docs/src/cli/commands/dev.ts
 import pc from "picocolors";
 import { createDocsServer } from "../../server/index.js";
+import { FOLIO_VERSION } from "../../version.js";
 
 export interface DevCommandOptions {
   port?: string;
@@ -14,7 +15,7 @@ export async function runDevCommand(dir: string | undefined, options: DevCommand
   const open = options.open ?? false;
 
   console.log();
-  console.log(pc.bold(pc.cyan("  Folio ")) + pc.dim("v0.12.2"));
+  console.log(pc.bold(pc.cyan("  Folio ")) + pc.dim(`v${FOLIO_VERSION}`));
   console.log(pc.dim("  Honoring Niko Pirosmani (Nikala) — Elegant docs for SolidJS"));
   console.log();
 

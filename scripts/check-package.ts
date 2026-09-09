@@ -14,6 +14,7 @@ assert.deepEqual(packageJson.files, ["dist"], "published files must be limited t
 const publishedTargets = new Set<string>();
 const addTarget = (target: unknown, field: string) => {
   assert.equal(typeof target, "string", `${field} must be a string`);
+  if (typeof target !== "string") return;
   publishedTargets.add(target);
 };
 

@@ -3,6 +3,7 @@ import { execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import fs from "fs-extra";
 import pc from "picocolors";
+import { FOLIO_VERSION } from "../../version.js";
 
 interface RegistryFile { path: string; content: string; }
 interface RegistryItem {
@@ -320,7 +321,7 @@ async function writeProjectFiles(root: string, registryDependencies: string[]): 
 export async function runInitCommand(targetDir = "."): Promise<void> {
   const root = path.resolve(process.cwd(), targetDir);
   console.log();
-  console.log(pc.bold(pc.cyan("  Folio ")) + pc.dim("v0.12.2"));
+  console.log(pc.bold(pc.cyan("  Folio ")) + pc.dim(`v${FOLIO_VERSION}`));
   console.log(pc.dim(`  Initializing copy-paste documentation project in ${pc.bold(root)}...`));
   console.log();
   await fs.ensureDir(root);
