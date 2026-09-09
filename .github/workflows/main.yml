@@ -56,6 +56,7 @@ jobs:
           name: docs-dist
           path: .docs-dist
           if-no-files-found: error
+          include-hidden-files: true
           retention-days: 14
 
       - name: Upload package artifact
