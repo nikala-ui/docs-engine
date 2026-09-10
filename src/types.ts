@@ -15,6 +15,8 @@ export interface Frontmatter {
   icon?: string;
   badge?: string;
   addedAt?: string;
+  updatedAt?: string;
+  noindex?: boolean;
   prev?: string | { title: string; href: string } | boolean;
   next?: string | { title: string; href: string } | boolean;
   toc?: boolean;

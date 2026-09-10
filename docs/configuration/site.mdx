@@ -29,6 +29,10 @@ export default {
 - `title` is used in the navbar and browser titles.
 - `description` is the fallback description for pages without frontmatter.
 - `siteUrl` enables canonical URLs in generated HTML.
+- A page can set `updatedAt` in frontmatter to include an ISO date in the
+  sitemap.
+- A page can set `noindex: true` in frontmatter to emit a `noindex` robots meta
+  tag and exclude the page from the sitemap.
 - `seo.image` and `seo.imageAlt` configure social preview metadata.
 - `seo.siteName` optionally overrides the site `title` used in social and
   structured metadata.

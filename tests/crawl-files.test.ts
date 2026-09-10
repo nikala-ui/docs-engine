@@ -15,7 +15,11 @@ async function createFixture(siteUrl?: string) {
   );
   await writeFile(
     path.join(root, "docs", "guide.mdx"),
-    "---\ntitle: Guide\ndescription: A guide.\n---\n\n# Guide\n",
+    "---\ntitle: Guide\ndescription: A guide.\nupdatedAt: 2026-09-11\n---\n\n# Guide\n",
+  );
+  await writeFile(
+    path.join(root, "docs", "internal.mdx"),
+    "---\ntitle: Internal\nnoindex: true\n---\n\n# Internal\n",
   );
 
   const output = path.join(root, "out");
@@ -36,6 +40,8 @@ describe("generated crawl files", () => {
 
       expect(sitemap).toContain("https://docs.example.test/");
       expect(sitemap).toContain("https://docs.example.test/guide");
+      expect(sitemap).toContain("<lastmod>2026-09-11</lastmod>");
+      expect(sitemap).not.toContain("https://docs.example.test/internal");
       expect(robots).toContain("User-agent: *");
       expect(robots).toContain("Allow: /");
       expect(robots).toContain("Sitemap: https://docs.example.test/sitemap.xml");

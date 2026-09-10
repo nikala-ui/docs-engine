@@ -40,4 +40,13 @@ describe("renderSeoMetadata", () => {
     expect(html).not.toContain("application/ld+json");
     expect(html).toContain('property="og:title" content="Introduction - Folio"');
   });
+
+  test("marks noindex pages for crawlers", () => {
+    const html = renderSeoMetadata(
+      { title: "Folio" },
+      { ...page, frontmatter: { noindex: true } },
+    );
+
+    expect(html).toContain('name="robots" content="noindex, follow"');
+  });
 });

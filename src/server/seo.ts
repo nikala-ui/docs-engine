@@ -38,6 +38,9 @@ export function renderSeoMetadata(config: DocsConfig, page: PageData): string {
   if (description) {
     tags.push(`<meta name="description" content="${escapeHtml(description)}">`);
   }
+  if (page.frontmatter.noindex === true) {
+    tags.push(`<meta name="robots" content="noindex, follow">`);
+  }
   if (pageUrl) {
     tags.push(`<link rel="canonical" href="${escapeHtml(pageUrl)}">`);
     tags.push(`<meta property="og:url" content="${escapeHtml(pageUrl)}">`);
@@ -92,4 +95,14 @@ export function renderSeoMetadata(config: DocsConfig, page: PageData): string {
   }
 
   return tags.join("");
+}
+
+export function isPageIndexable(page: PageData): boolean {
+  return page.frontmatter.noindex !== true;
+}
+
+export function getPageLastModified(page: PageData): string | undefined {
+  const value = page.frontmatter.updatedAt;
+  if (!value || Number.isNaN(Date.parse(value))) return undefined;
+  return new Date(value).toISOString().slice(0, 10);
 }

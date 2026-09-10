@@ -12,7 +12,7 @@ import { nikalaDocsPlugin } from "./plugin.js";
 import type { DocsConfig } from "../types.js";
 import { loadConfig } from "../config.js";
 import { scanContent } from "../core/content-scanner.js";
-import { renderSeoMetadata } from "./seo.js";
+import { getPageLastModified, isPageIndexable, renderSeoMetadata } from "./seo.js";
 
 export interface DocsServerOptions {
   root?: string;
@@ -424,7 +424,13 @@ async function prerenderDocs(options: DocsServerOptions, outDir: string, templat
 
     if (config.siteUrl) {
       const base = config.siteUrl.replace(/\/$/, "");
-      const urls = pages.map((page) => `<url><loc>${escapeHtml(`${base}${page.url === "/" ? "/" : page.url}`)}</loc></url>`).join("");
+      const urls = pages
+        .filter(isPageIndexable)
+        .map((page) => {
+          const lastmod = getPageLastModified(page);
+          return `<url><loc>${escapeHtml(`${base}${page.url === "/" ? "/" : page.url}`)}</loc>${lastmod ? `<lastmod>${lastmod}</lastmod>` : ""}</url>`;
+        })
+        .join("");
       await fs.writeFile(path.join(outDir, "sitemap.xml"), `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls}</urlset>`);
       await fs.writeFile(path.join(outDir, "robots.txt"), `User-agent: *\nAllow: /\nSitemap: ${base}/sitemap.xml\n`);
     }
