@@ -4,6 +4,7 @@ import type { DocsConfig } from "./src/types.js";
 const config: DocsConfig = {
   title: "Folio",
   description: "A fast, elegant, and customizable documentation engine for SolidJS.",
+  siteUrl: "https://folio.nikala.dev",
   favicon: "/favicon.ico",
   contentDir: "docs",
   repository: {
