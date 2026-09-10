@@ -70,19 +70,49 @@ the indexing process.
 
 ## Build the index
 
-The adapter package does not crawl documentation or upload records. Indexing
-must run separately with a trusted server or CI job that has an Algolia Admin
-API key.
+The adapter package does not crawl documentation or upload records in the
+browser. Create one indexing script in the consuming Folio project and run it
+from a trusted server or CI job that has an Algolia Admin API key. You do not
+add indexing code to individual MDX pages.
 
-Use `toAlgoliaRecord` to preserve the page data needed by Folio:
+The script should load Folio's configuration, resolve the configured
+`contentDir`, scan the pages, and pass the complete page collection to the
+indexer:
 
 ```ts
-import { toAlgoliaRecord } from "@nikala-ui/folio-algolia";
+// scripts/index-search.ts
+import path from "node:path";
+import { DEFAULT_DOCS_CONFIG, loadConfig } from "@nikala-ui/folio/config";
+import { scanContent } from "@nikala-ui/folio/content";
+import {
+  createAlgoliaIndexer,
+  getAlgoliaIndexerOptions,
+} from "@nikala-ui/folio-algolia/indexing";
 
-const record = toAlgoliaRecord(page);
+const projectRoot = process.cwd();
+const config = await loadConfig(projectRoot);
+const contentDir = path.resolve(
+  projectRoot,
+  config.contentDir ?? DEFAULT_DOCS_CONFIG.contentDir,
+);
+const pages = await scanContent(contentDir);
+const indexer = createAlgoliaIndexer(getAlgoliaIndexerOptions());
+const dryRun = process.argv.includes("--dry-run");
+
+const summary = await indexer.sync(pages, { dryRun });
+console.log(summary);
 ```
 
-Each record contains:
+Run it from the documentation project's root:
+
+```bash
+bun run scripts/index-search.ts --dry-run
+bun run scripts/index-search.ts
+```
+
+The `--dry-run` option scans and maps the pages without uploading or deleting
+records. The regular run uploads the current catalog in batches. The indexer
+uses `toAlgoliaRecord` internally, so each record contains:
 
 - `objectID` — the stable Folio page URL;
 - `slug` and `url` — route identifiers;
@@ -90,9 +120,30 @@ Each record contains:
 - `metadata` — the page frontmatter;
 - `headings` — table-of-contents text from the page.
 
-The `page` value must be a Folio page record. Keep the indexing script in the
-consumer project or in a separate private indexing service; never ship Admin
-credentials to the browser.
+The script follows the `contentDir` from `docs.config.ts`; it does not assume
+that the documentation directory is named `docs`. Keep the indexing script in
+the consumer project or in a separate private indexing service. Never ship
+`ALGOLIA_ADMIN_API_KEY` to the browser.
+
+### Full synchronization
+
+The default mode upserts the current pages. To also remove records that no
+longer exist in the current catalog, use full synchronization:
+
+```ts
+const summary = await indexer.sync(pages, {
+  mode: "full",
+  dryRun,
+});
+```
+
+Full synchronization reads the existing Algolia `objectID` values, uploads
+the current pages, and deletes stale records. Use it only with the Admin API
+key, and review a dry run before the first full sync.
+
+The indexer retries transient rate-limit and server errors. You can adjust
+`maxRetries` and `retryDelayMs` when creating the indexer if the indexing job
+needs different retry limits.
 
 ## Alternative factory setup
 
