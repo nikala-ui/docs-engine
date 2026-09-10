@@ -16,6 +16,10 @@ jobs:
   quality:
     name: Local quality contract
     runs-on: ubuntu-latest
+    env:
+      VITE_ALGOLIA_APP_ID: ${{ vars.ALGOLIA_APP_ID }}
+      VITE_ALGOLIA_SEARCH_KEY: ${{ vars.ALGOLIA_SEARCH_KEY }}
+      VITE_ALGOLIA_INDEX: ${{ vars.ALGOLIA_INDEX }}
 
     steps:
       - name: Check out repository
@@ -44,6 +48,10 @@ jobs:
   browser-ssr:
     name: Browser and SSR smoke test
     runs-on: ubuntu-latest
+    env:
+      VITE_ALGOLIA_APP_ID: ${{ vars.ALGOLIA_APP_ID }}
+      VITE_ALGOLIA_SEARCH_KEY: ${{ vars.ALGOLIA_SEARCH_KEY }}
+      VITE_ALGOLIA_INDEX: ${{ vars.ALGOLIA_INDEX }}
 
     steps:
       - name: Check out repository
@@ -110,6 +118,10 @@ jobs:
   static:
     name: Static and bundle checks
     runs-on: ubuntu-latest
+    env:
+      VITE_ALGOLIA_APP_ID: ${{ vars.ALGOLIA_APP_ID }}
+      VITE_ALGOLIA_SEARCH_KEY: ${{ vars.ALGOLIA_SEARCH_KEY }}
+      VITE_ALGOLIA_INDEX: ${{ vars.ALGOLIA_INDEX }}
 
     steps:
       - name: Check out repository
@@ -150,6 +162,9 @@ jobs:
     env:
       NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
       NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+      VITE_ALGOLIA_APP_ID: ${{ vars.ALGOLIA_APP_ID }}
+      VITE_ALGOLIA_SEARCH_KEY: ${{ vars.ALGOLIA_SEARCH_KEY }}
+      VITE_ALGOLIA_INDEX: ${{ vars.ALGOLIA_INDEX }}
 
     steps:
       - name: Check out repository
