@@ -11,6 +11,9 @@ import type { DocsSearchDialogProps } from "../../types.js";
 import { resolveSearchProvider, searchPages } from "../../../search/provider.js";
 
 export const DocsSearchDialog: Component<DocsSearchDialogProps> = (props) => {
+  const showAlgoliaAttribution = () =>
+    typeof props.provider !== "string" && props.provider?.name === "algolia";
+
   const handleOpenChange = (open: boolean) => {
     props.onOpenChange(open);
   };
@@ -79,6 +82,20 @@ export const DocsSearchDialog: Component<DocsSearchDialogProps> = (props) => {
                 </CommandGroup>
               </Show>
             </CommandList>
+            <Show when={showAlgoliaAttribution()}>
+              <div class="flex items-center justify-end border-t border-border px-3 py-2">
+                <a
+                  href="https://www.algolia.com"
+                  target="_blank"
+                  rel="noreferrer"
+                  class="inline-flex items-center gap-1.5 text-xs text-muted-foreground transition-colors hover:text-foreground"
+                  aria-label="Search by Algolia"
+                >
+                  <span>Search by</span>
+                  <img src="/algolia-logo.svg" alt="Algolia" class="h-4 w-auto object-contain" />
+                </a>
+              </div>
+            </Show>
           </>
         );
       }}

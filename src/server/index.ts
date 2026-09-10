@@ -125,6 +125,7 @@ function getSharedConfig(options: DocsServerOptions, isDev = false, isSSR = fals
   const root = options.root ? path.resolve(process.cwd(), options.root) : process.cwd();
   const clientDir = getClientDir();
   const publicDir = path.join(root, "public");
+  const sourcePublicDir = path.resolve(__dirname, "../../src/client/public");
   const solidJsDir = getSolidJsDir();
   const docsSrc = getDocsSourceDir();
   const localSrc = path.join(root, "src");
@@ -164,7 +165,11 @@ function getSharedConfig(options: DocsServerOptions, isDev = false, isSSR = fals
     // variables (for example VITE_ALGOLIA_*). Vite's root is the packaged
     // Folio client, so point env loading back at the consumer project.
     envDir: root,
-    publicDir: fs.existsSync(publicDir) ? publicDir : path.join(clientDir, "public"),
+    publicDir: fs.existsSync(publicDir)
+      ? publicDir
+      : isDev && fs.existsSync(sourcePublicDir)
+        ? sourcePublicDir
+        : path.join(clientDir, "public"),
     resolve: {
       alias: aliases,
       dedupe: ["solid-js", "solid-js/web", "solid-js/store"],
