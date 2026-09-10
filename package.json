@@ -18,6 +18,14 @@
       "types": "./dist/server/plugin.d.ts",
       "import": "./dist/server/plugin.js"
     },
+    "./config": {
+      "types": "./dist/config.d.ts",
+      "import": "./dist/config.js"
+    },
+    "./content": {
+      "types": "./dist/core/content-scanner.d.ts",
+      "import": "./dist/core/content-scanner.js"
+    },
     "./theme": {
       "types": "./dist/themes/default/index.d.ts",
       "import": "./dist/themes/default/index.js"
