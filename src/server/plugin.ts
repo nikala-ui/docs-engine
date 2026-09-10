@@ -9,6 +9,7 @@ import { compileMdx } from "../mdx/compiler.js";
 import { loadConfig } from "../config.js";
 import { resolveDefaultThemeMode } from "../theme-mode.js";
 import type { DocsConfig, PageData } from "../types.js";
+import { serializeModuleValue } from "./module-serialization.js";
 
 export interface NikalaDocsPluginOptions {
   docsDir?: string;
@@ -253,11 +254,11 @@ export default { createHighlighter, bundledLanguages, bundledThemes };
 
       if (id === RESOLVED_CONFIG_ID) {
         const configFile = findConfigFile(rootDir);
-        if (!configFile) return `export default ${JSON.stringify(resolvedConfig)};`;
+        if (!configFile) return `export default ${serializeModuleValue(resolvedConfig)};`;
 
         return `
-import userConfig from ${JSON.stringify(configFile)};
-const defaults = ${JSON.stringify(resolvedConfig)};
+import userConfig from ${serializeModuleValue(configFile)};
+const defaults = ${serializeModuleValue(resolvedConfig)};
 const config = {
   ...defaults,
   ...userConfig,
@@ -286,8 +287,8 @@ export default config;
           ? buildConfiguredSidebarTree(configuredSidebar, cachedPages)
           : buildSidebarTree(cachedPages, directories);
         return `
-export const pages = ${JSON.stringify(cachedPages)};
-export const tree = ${JSON.stringify(tree)};
+export const pages = ${serializeModuleValue(cachedPages)};
+export const tree = ${serializeModuleValue(tree)};
 export default { pages, tree };
 `;
       }
@@ -295,7 +296,7 @@ export default { pages, tree };
       if (id === RESOLVED_ROUTES_ID) {
         cachedPages = await scanContent(docsDir);
         const routeEntries = cachedPages.map((page) =>
-          `  ${JSON.stringify(page.url)}: () => import(${JSON.stringify(page.filePath)})`
+          `  ${serializeModuleValue(page.url)}: () => import(${serializeModuleValue(page.filePath)})`
         );
 
         return `
@@ -309,7 +310,7 @@ export default routes;
       if (id === RESOLVED_SOURCES_ID) {
         cachedPages = await scanContent(docsDir);
         const sourceEntries = cachedPages.map((page) =>
-          `  ${JSON.stringify(page.url)}: () => import(${JSON.stringify(`${page.filePath}?raw`)})`
+          `  ${serializeModuleValue(page.url)}: () => import(${serializeModuleValue(`${page.filePath}?raw`)})`
         );
 
         return `
@@ -342,14 +343,14 @@ export default sources;
         const moduleEntries = [...modules.values()];
         const imports = moduleEntries.map(({ index, file }) =>
           modules.get(file)!.isStatic
-            ? `import * as componentModule${index} from ${JSON.stringify(file)};`
-            : `const componentModule${index} = () => import(${JSON.stringify(file)});`
+            ? `import * as componentModule${index} from ${serializeModuleValue(file)};`
+            : `const componentModule${index} = () => import(${serializeModuleValue(file)});`
         );
         const entries = exports.map(({ name, file }) => {
           const module = modules.get(file)!;
           return module.isStatic
-            ? `  ${JSON.stringify(name)}: componentModule${module.index}[${JSON.stringify(name)}]`
-            : `  ${JSON.stringify(name)}: lazy(() => componentModule${module.index}().then((module) => ({ default: module[${JSON.stringify(name)}] })))`;
+            ? `  ${serializeModuleValue(name)}: componentModule${module.index}[${serializeModuleValue(name)}]`
+            : `  ${serializeModuleValue(name)}: lazy(() => componentModule${module.index}().then((module) => ({ default: module[${serializeModuleValue(name)}] })))`;
         });
 
         return `
@@ -382,8 +383,8 @@ export default components;
           }
         }
 
-        const imports = entries.map(({ specifier }, index) => `import icon${index} from ${JSON.stringify(specifier)};`);
-        const iconEntries = entries.map(({ name }, index) => `  ${JSON.stringify(toLucideComponentName(name))}: icon${index}`);
+        const imports = entries.map(({ specifier }, index) => `import icon${index} from ${serializeModuleValue(specifier)};`);
+        const iconEntries = entries.map(({ name }, index) => `  ${serializeModuleValue(toLucideComponentName(name))}: icon${index}`);
 
         return `
 ${imports.join("\n")}
@@ -397,7 +398,7 @@ ${iconEntries.join(",\n")}
         const configuredPath = resolvedConfig.theme?.path;
         if (!configuredPath) {
           const defaultEntry = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../themes/default/index.js");
-          return `import defaultTheme from ${JSON.stringify(defaultEntry)}; export const theme = defaultTheme; export default theme;`;
+          return `import defaultTheme from ${serializeModuleValue(defaultEntry)}; export const theme = defaultTheme; export default theme;`;
         }
 
         const requestedPath = path.resolve(options.configRoot || rootDir, configuredPath);
@@ -410,7 +411,7 @@ ${iconEntries.join(",\n")}
         ];
         const themeEntry = candidates.find((candidate) => fs.existsSync(candidate));
         if (!themeEntry) throw new Error(`[folio] Theme path does not exist: ${requestedPath}`);
-        return `import configuredTheme from ${JSON.stringify(themeEntry)}; export const theme = configuredTheme.default || configuredTheme; export default theme;`;
+        return `import configuredTheme from ${serializeModuleValue(themeEntry)}; export const theme = configuredTheme.default || configuredTheme; export default theme;`;
       }
 
       return null;
