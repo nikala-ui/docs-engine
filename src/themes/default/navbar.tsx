@@ -41,7 +41,7 @@ export const DocsNavbar: Component<DocsNavbarProps> = (props) => {
           </Show>
           <Show when={local.showBrand !== false}>
             <NavbarBrand href={logoHref()} class="text-base font-bold tracking-tight">
-              <Show when={local.config.logo?.image} fallback={<Logo class="size-6" />}>
+              <Show when={local.config.logo?.image} fallback={<Logo class="h-6 w-auto" />}>
                 {(img) => <img src={img()} alt={logoText()} class="size-6 object-contain" />}
               </Show>
               <span>{logoText()}</span>

@@ -73,7 +73,7 @@ export const DocsSidebar: Component<DocsSidebarProps> = (props) => {
             class={cn(sidebarMenuButtonVariants({ variant: "default", size: "default" }), "h-8 w-full justify-between group-data-[collapsible=icon]:h-10")}
           >
             <div class="flex items-center gap-2.5 overflow-hidden">
-              <Show when={local.logo?.image} fallback={<Logo class="size-7" />}>
+              <Show when={local.logo?.image} fallback={<Logo class="h-7 w-auto" />}>
                 {(image) => <img src={image()} alt={brandText()} class="size-7 shrink-0 rounded-md object-contain" />}
               </Show>
               <div class="flex min-w-0 flex-col gap-0.5 leading-none group-data-[collapsible=icon]:hidden">
