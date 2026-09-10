@@ -1,3 +1,4 @@
+import { algoliaAdapter } from "@nikala-ui/folio-algolia";
 import type { DocsConfig } from "./src/types.js";
 
 const config: DocsConfig = {
@@ -47,7 +48,7 @@ const config: DocsConfig = {
   },
   search: {
     enabled: true,
-    provider: "local",
+    provider: algoliaAdapter,
   },
   shiki: {
     themes: {

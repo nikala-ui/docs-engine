@@ -61,6 +61,7 @@
     "docs:dev": "bun run build && bun dist/cli/index.js dev",
     "docs:build": "bun run build && bun dist/cli/index.js build -o .docs-dist",
     "docs:preview": "bun run build && bun dist/cli/index.js build -o .docs-dist && bun dist/cli/index.js preview -o .docs-dist",
+    "index:search": "bun scripts/index-search.ts",
     "check": "bun run typecheck && bun run test && bun run build && bun run docs:build",
     "dev": "tsc -p tsconfig.build.json --watch"
   },
@@ -94,6 +95,7 @@
     "tailwindcss": ">=4.0.0"
   },
   "devDependencies": {
+    "@nikala-ui/folio-algolia": "0.2.0",
     "@types/fs-extra": "^11.0.4",
     "@types/node": "^26.1.1",
     "playwright": "1.63.0",
