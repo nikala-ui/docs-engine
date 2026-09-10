@@ -95,6 +95,9 @@ export async function resolveDocsConfig(cwd: string = process.cwd()): Promise<Do
               ...resolvedUserConfig.shiki?.themes,
             },
           },
+          seo: {
+            ...resolvedUserConfig.seo,
+          },
           search: {
             ...DEFAULT_DOCS_CONFIG.search,
             ...resolvedUserConfig.search,

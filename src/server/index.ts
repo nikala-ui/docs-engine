@@ -12,6 +12,7 @@ import { nikalaDocsPlugin } from "./plugin.js";
 import type { DocsConfig } from "../types.js";
 import { loadConfig } from "../config.js";
 import { scanContent } from "../core/content-scanner.js";
+import { renderSeoMetadata } from "./seo.js";
 
 export interface DocsServerOptions {
   root?: string;
@@ -412,12 +413,7 @@ async function prerenderDocs(options: DocsServerOptions, outDir: string, templat
         }
       }
 
-      const title = escapeHtml(`${page.title} - ${config.title || "Documentation"}`);
-      const description = escapeHtml(page.description || config.description || "");
-      const canonical = config.siteUrl
-        ? `<link rel="canonical" href="${escapeHtml(`${config.siteUrl.replace(/\/$/, "")}${page.url === "/" ? "/" : page.url}`)}">`
-        : "";
-      const metadata = `<title>${title}</title>${description ? `<meta name="description" content="${description}">` : ""}${canonical}`;
+      const metadata = renderSeoMetadata(config, page);
       const html = addHydrationScript(template, renderer?.hydrationScript)
         .replace(/<title>[^<]*<\/title>/i, metadata)
         .replace('<div id="root"></div>', `<div id="root" data-prerendered>${content}</div>`);
@@ -563,13 +559,8 @@ export async function createDocsRequestHandler(options: DocsServerOptions = {}):
     if (renderer) {
       try {
         const rendered = await renderWithTimeout(renderer, page.url);
-      const title = escapeHtml(`${page.title} - ${config.title || "Documentation"}`);
-        const description = escapeHtml(page.description || config.description || "");
-        const canonical = config.siteUrl
-          ? `<link rel="canonical" href="${escapeHtml(`${config.siteUrl.replace(/\/$/, "")}${page.url === "/" ? "/" : page.url}`)}">`
-          : "";
         const html = addHydrationScript(template, renderer.hydrationScript)
-        .replace(/<title>[^<]*<\/title>/i, `<title>${title}</title>${description ? `<meta name="description" content="${description}">` : ""}${canonical}`)
+        .replace(/<title>[^<]*<\/title>/i, renderSeoMetadata(config, page))
           .replace('<div id="root"></div>', `<div id="root" data-prerendered>${rendered}</div>`);
         return new Response(html, { headers: { "content-type": "text/html; charset=utf-8" } });
       } catch {
