@@ -1,6 +1,6 @@
 {
   "name": "@nikala-ui/folio",
-  "version": "0.13.2",
+  "version": "0.14.0",
   "license": "MIT",
   "description": "Zero-config, fast, and elegant documentation engine for SolidJS, built on Nikala UI and Tailwind CSS v4",
   "type": "module",
@@ -17,6 +17,14 @@
     "./plugin": {
       "types": "./dist/server/plugin.d.ts",
       "import": "./dist/server/plugin.js"
+    },
+    "./config": {
+      "types": "./dist/config.d.ts",
+      "import": "./dist/config.js"
+    },
+    "./content": {
+      "types": "./dist/core/content-scanner.d.ts",
+      "import": "./dist/core/content-scanner.js"
     },
     "./theme": {
       "types": "./dist/themes/default/index.d.ts",

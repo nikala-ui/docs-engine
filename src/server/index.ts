@@ -160,6 +160,10 @@ function getSharedConfig(options: DocsServerOptions, isDev = false, isSSR = fals
 
   return {
     root: clientDir,
+    // The consuming documentation project owns its public Vite environment
+    // variables (for example VITE_ALGOLIA_*). Vite's root is the packaged
+    // Folio client, so point env loading back at the consumer project.
+    envDir: root,
     publicDir: fs.existsSync(publicDir) ? publicDir : path.join(clientDir, "public"),
     resolve: {
       alias: aliases,

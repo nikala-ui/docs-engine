@@ -44,6 +44,7 @@ export const DocsLayout: ParentComponent<DocsLayoutProps> = (props) => {
 
   const [searchOpen, setSearchOpen] = createSignal(false);
   const pageClipboard = createClipboard();
+  const searchEnabled = () => local.config.search?.enabled !== false;
   const searchProvider = () => resolveSearchProvider(local.config.search);
 
   const currentUrl = () => local.currentPage?.url;
@@ -194,7 +195,7 @@ export const DocsLayout: ParentComponent<DocsLayoutProps> = (props) => {
           </Container>
         </Show>
       </Container>
-      <DocsSearchDialog open={searchOpen()} onOpenChange={setSearchOpen} pages={local.pages} provider={searchProvider().active} />
+      <DocsSearchDialog open={searchOpen()} onOpenChange={setSearchOpen} pages={local.pages} provider={searchEnabled() ? searchProvider().implementation : undefined} />
     </SidebarInset>
   );
 
@@ -215,7 +216,7 @@ export const DocsLayout: ParentComponent<DocsLayoutProps> = (props) => {
           </Show>
         </Container>
       </Container>
-      <DocsSearchDialog open={searchOpen()} onOpenChange={setSearchOpen} pages={local.pages} provider={searchProvider().active} />
+      <DocsSearchDialog open={searchOpen()} onOpenChange={setSearchOpen} pages={local.pages} provider={searchEnabled() ? searchProvider().implementation : undefined} />
     </SidebarInset>
   );
 

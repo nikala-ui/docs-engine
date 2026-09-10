@@ -1,5 +1,6 @@
 // packages/docs/src/index.ts
 export * from "./types.js";
+export type { SearchAdapter, SearchContext } from "./search/provider.js";
 export * from "./navigation/index.js";
 export * from "./config.js";
 export * from "./core/content-scanner.js";
@@ -9,6 +10,7 @@ export * from "./mdx/highlighter.js";
 export * from "./components/mdx-components.js";
 export * from "./themes/index.js";
 export * from "./server/index.js";
+export * from "./search/provider.js";
 
 import { nikalaDocsPlugin } from "./server/plugin.js";
 export const nikalaDocs = nikalaDocsPlugin;

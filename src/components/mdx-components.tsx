@@ -97,7 +97,10 @@ export function MdxCode(props: HtmlProps<HTMLElement>) {
 }
 
 function isPackageCommand(code: string, language: string) {
-  return /^(bash|sh|shell|zsh)$/i.test(language) && !code.includes("\n") && /^(bun|npm|pnpm|yarn|bunx|npx)\s+/.test(code.trim());
+  const packageCommand = /^(?:(?:bun|npm|pnpm|yarn)\s+(?:add|install|i|create|run)\s+|(?:bunx|npx|pnpm\s+dlx|yarn\s+dlx)\s+)/i;
+  return /^(bash|sh|shell|zsh)$/i.test(language)
+    && !code.includes("\n")
+    && packageCommand.test(code.trim());
 }
 
 /** Preserve Shiki's server-rendered children while using Nikala's code chrome. */

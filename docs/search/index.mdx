@@ -1,0 +1,34 @@
+---
+title: Search
+description: Choose a search provider and connect Folio to your documentation index.
+icon: search
+order: 4
+---
+
+Folio uses local search by default. The default implementation searches the
+generated page catalog in the browser and does not require a third-party
+service.
+
+Use an external provider when your documentation needs provider-side ranking,
+typo tolerance, filtering, analytics, or a shared index. External providers
+are installed as separate adapter packages, so Folio's core search UI stays
+independent of any specific search service.
+
+## Providers
+
+- [Local search and provider configuration](/configuration/search)
+- [Algolia](/search/algolia)
+
+The provider adapter returns Folio page records. Folio still owns the search
+dialog, keyboard shortcut, result rendering, navigation, and local fallback.
+
+## Choosing a provider
+
+Start with local search when the page catalog is small and search requests
+should stay entirely inside the site. Choose an external provider when the
+index is shared across sites or when you need provider-specific relevance and
+search features.
+
+Every external adapter should document its package installation, public
+browser configuration, index record format, security requirements, and local
+verification steps.

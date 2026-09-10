@@ -1,5 +1,5 @@
 // packages/docs/src/themes/default/overlays/search-dialog.tsx
-import { For, Show, type Component } from "solid-js";
+import { createEffect, createSignal, For, Show, type Component } from "solid-js";
 import { CommandDialog } from "@/components/ui/command";
 import { CommandInput } from "@/components/ui/command";
 import { CommandList } from "@/components/ui/command";
@@ -8,6 +8,7 @@ import { CommandGroup } from "@/components/ui/command";
 import { CommandItem } from "@/components/ui/command";
 import { FileText } from "lucide-solid";
 import type { DocsSearchDialogProps } from "../../types.js";
+import { resolveSearchProvider, searchPages } from "../../../search/provider.js";
 
 export const DocsSearchDialog: Component<DocsSearchDialogProps> = (props) => {
   const handleOpenChange = (open: boolean) => {
@@ -33,24 +34,35 @@ export const DocsSearchDialog: Component<DocsSearchDialogProps> = (props) => {
           document.querySelector<HTMLInputElement>("#docs-search-input")?.focus();
         });
       }}
-      enableHotkey={true}
+      enableHotkey={props.provider !== undefined}
     >
       {({ search }) => {
-        const query = () => search().trim().toLowerCase();
-        const filteredPages = () => (props.pages || []).filter((page) =>
-          !query() || [page.title, page.url, page.description]
-            .filter(Boolean)
-            .some((value) => value!.toLowerCase().includes(query()))
-        );
+        const query = () => search().trim();
+        const resolvedProvider = () => resolveSearchProvider({ provider: props.provider });
+        const [filteredPages, setFilteredPages] = createSignal(props.pages || []);
+        const [searching, setSearching] = createSignal(false);
+        let requestId = 0;
+
+        createEffect(() => {
+          const currentRequest = ++requestId;
+          setSearching(true);
+          Promise.resolve(searchPages(resolvedProvider(), query(), props.pages || []))
+            .then((results) => {
+              if (currentRequest === requestId) setFilteredPages(results);
+            })
+            .finally(() => {
+              if (currentRequest === requestId) setSearching(false);
+            });
+        });
 
         return (
           <>
             <CommandInput id="docs-search-input" placeholder="Search documentation..." />
             <CommandList>
-              <Show when={query().length > 0 && filteredPages().length === 0}>
+              <Show when={!searching() && query().length > 0 && filteredPages().length === 0}>
                 <CommandEmpty>No matching documents found.</CommandEmpty>
               </Show>
-              <Show when={filteredPages().length > 0}>
+              <Show when={!searching() && filteredPages().length > 0}>
                 <CommandGroup heading="Pages">
                   <For each={filteredPages()}>
                     {(page) => (

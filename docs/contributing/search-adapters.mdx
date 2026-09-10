@@ -1,0 +1,277 @@
+---
+title: Search adapters
+description: Build, test, and publish a search adapter for Folio.
+order: 1
+icon: search
+---
+
+A search adapter connects Folio to an external search engine. The adapter owns
+the provider-specific client, request format, authentication options, result
+mapping, and failure handling. Folio owns the search dialog, keyboard
+interaction, page navigation, and rendering.
+
+Keep those responsibilities separate. An adapter must not contain theme,
+sidebar, layout, or site-specific routing logic.
+
+## Adapter package structure
+
+Use a standalone package for a reusable integration. A small provider should
+still follow the same separation so that the implementation can grow without
+turning one file into an unmaintainable integration:
+
+```text
+folio-search-provider/
+├── src/
+│   ├── index.ts
+│   ├── adapter.ts
+│   ├── client.ts
+│   ├── types.ts
+│   └── normalize.ts
+├── tests/
+│   └── adapter.test.ts
+├── package.json
+├── tsconfig.json
+└── README.md
+```
+
+### File responsibilities
+
+- `src/index.ts` exposes the public factory, types, and package metadata.
+- `src/adapter.ts` creates the Folio adapter and coordinates the search flow.
+- `src/client.ts` contains the provider API client and request transport.
+- `src/types.ts` contains provider-specific request and response types.
+- `src/normalize.ts` converts provider hits into Folio page results.
+- `tests/adapter.test.ts` verifies the adapter without requiring a browser.
+- `README.md` documents installation, credentials, indexing, and support policy.
+
+Do not place provider implementation code in Folio core. Do not add provider
+branches to the default theme or search dialog.
+
+## Public naming rules
+
+Use stable, provider-neutral names in the package API:
+
+- `SearchAdapter` — the Folio adapter contract.
+- `SearchAdapterOptions` — options required to construct an adapter.
+- `createProviderAdapter` — the factory that creates a configured adapter.
+- `ProviderClient` — the provider API client type or implementation.
+- `ProviderSearchResponse` — the provider response type.
+- `normalizeProviderHit` — the function that maps one provider hit.
+- `name` — the stable provider identifier stored on the adapter.
+- `search` — the adapter entry point.
+- `query` — the current search text.
+- `pages` — the complete Folio page catalog supplied to the adapter.
+
+Replace `Provider` with the actual integration name in public symbols. Keep
+the factory name explicit; do not export an ambiguous `createAdapter` from a
+package that may be composed with other integrations.
+
+The adapter identifier must be lowercase, stable, and unique. It should not
+contain credentials, an index name, an environment name, or a site-specific
+value.
+
+## Folio adapter contract
+
+Every adapter implements the following contract:
+
+```ts
+import type { PageData } from "@nikala-ui/folio";
+
+export interface SearchContext {
+  query: string;
+  pages: PageData[];
+}
+
+export interface SearchAdapter {
+  name: string;
+  search: (
+    context: SearchContext,
+  ) => PageData[] | Promise<PageData[]>;
+}
+```
+
+The `search` method may be synchronous for an in-memory index or asynchronous
+for a remote provider. It must always return Folio `PageData` objects, not
+provider-specific hits.
+
+## Factory and provider options
+
+External providers normally require connection and index settings. Expose
+those values through a typed factory rather than hardcoding them in the
+adapter source:
+
+```ts
+export interface ProviderAdapterOptions {
+  appId: string;
+  apiKey: string;
+  indexName: string;
+}
+
+export function createProviderAdapter(
+  options: ProviderAdapterOptions,
+): SearchAdapter {
+  const client = createProviderClient(options);
+
+  return {
+    name: "provider",
+    async search(context) {
+      return searchProvider(client, context);
+    },
+  };
+}
+```
+
+Use the smallest option set required by the provider. Common options include
+an application identifier, a public search key, an index name, a regional
+endpoint, filters, locale, and a result limit.
+
+Never accept an administrative key in browser-side adapter options. If
+indexing or management operations need private credentials, keep them in a
+separate server-side command or deployment process.
+
+## Search lifecycle
+
+Implement the search flow in this order:
+
+1. Receive `query` and the complete `pages` catalog.
+2. Trim and normalize the query according to the provider's rules.
+3. Return a predictable result for an empty query.
+4. Send only the fields required by the provider API.
+5. Validate the remote response before reading it.
+6. Map every returned hit back to a Folio page.
+7. Preserve the original page objects whenever possible.
+8. Remove duplicates and discard hits that cannot be mapped safely.
+9. Return an ordered `PageData[]` result.
+
+An empty query must not trigger a remote request unless the provider's
+documented behavior explicitly requires it. The adapter must not mutate the
+`pages` array or any individual page object.
+
+## Page data and metadata
+
+Folio search results are page records, not just links. A mapped result must
+preserve the page's complete identity and metadata:
+
+```ts
+export interface PageData {
+  slug: string;
+  url: string;
+  filePath: string;
+  sourcePath?: string;
+  frontmatter: Record<string, unknown>;
+  toc: Array<{
+    id: string;
+    text: string;
+    depth: number;
+  }>;
+  title: string;
+  description?: string;
+}
+```
+
+At minimum, provider indexing should include `title`, `url`, and
+`description`. When the provider supports richer documents, it may also index
+the page body, headings, slug, and selected frontmatter values.
+
+When converting a provider hit back to a result:
+
+- use the canonical Folio page from `pages` as the source of truth;
+- match by stable `url` or `slug`, never by display title alone;
+- preserve `frontmatter`, `toc`, `filePath`, and `sourcePath`;
+- keep `title` and `description` from Folio unless the integration explicitly
+  documents a trusted indexed-content policy;
+- never fabricate a `PageData` object for a URL that is not in `pages`.
+
+Custom frontmatter is part of the page metadata. Do not drop it while mapping
+remote results, even when the current theme does not display every field.
+
+## Remote client rules
+
+Keep transport details inside `client.ts`:
+
+- construct URLs and request bodies in one place;
+- encode query and filter values safely;
+- set request timeouts or cancellation where supported;
+- validate status codes and response shapes;
+- avoid logging API keys, authorization headers, or full query payloads;
+- keep provider SDK imports out of Folio core;
+- make the client replaceable in tests.
+
+The adapter must remain usable during SSR. Do not access `window`, `document`,
+`localStorage`, or browser-only SDK globals during module evaluation. If a
+provider has separate server and browser clients, select them explicitly and
+document the boundary.
+
+## Error and fallback behavior
+
+Network failures, malformed responses, rate limits, and authentication errors
+must be handled deliberately. Do not let an unhandled provider exception break
+the documentation site's rendering or hydration.
+
+Choose and document one of these behaviors for each failure class:
+
+- return an empty result and log a diagnostic message;
+- return the original local result when a local index is available;
+- throw a typed, user-safe error handled by the host application.
+
+Never expose provider response bodies, credentials, or internal request details
+directly in the search UI.
+
+## Indexing requirements
+
+An adapter package should document how the provider index is produced. The
+indexing process must define:
+
+- the canonical page identifier;
+- the fields indexed from `PageData`;
+- the treatment of title, description, headings, and content;
+- the handling of frontmatter metadata;
+- URL normalization and trailing slashes;
+- deletion of pages removed from the documentation site;
+- deployment order between site output and index updates.
+
+Indexing is separate from browser search. Do not ship administrative indexing
+credentials or indexing scripts in the client adapter bundle.
+
+## Testing requirements
+
+Every adapter package must test the public factory and search behavior:
+
+- creates an adapter with valid options;
+- exposes a stable `name`;
+- returns all pages for an empty query when that is the documented policy;
+- sends the normalized query to the provider client;
+- maps provider hits to the correct `PageData` records;
+- preserves title, description, frontmatter, TOC, and route fields;
+- removes duplicate and unknown results;
+- handles empty provider responses;
+- handles malformed responses;
+- handles network errors and non-success status codes;
+- does not expose private credentials in requests intended for the browser;
+- does not access browser globals during module evaluation;
+- supports cancellation or stale-response protection where requests overlap.
+
+Use a mocked provider client in unit tests. Add an integration test only for
+the transport behavior that cannot be covered by the mock.
+
+## Package quality checklist
+
+Before publishing an adapter package, verify:
+
+- the package has a clear provider-specific name;
+- the public entry point exports the factory and relevant types;
+- the package has no Folio source-path assumptions;
+- runtime dependencies are declared in `dependencies`;
+- type-only dependencies are declared correctly;
+- browser and server entry points are intentional;
+- the build emits JavaScript and declaration files;
+- tests pass without a real provider account;
+- credentials are documented as environment-backed inputs;
+- README examples do not contain real keys;
+- the package does not hardcode a site's routes, branding, or page catalog;
+- the package does not modify Folio's theme or navigation;
+- the package follows the provider's terms and rate limits.
+
+The final adapter should be a focused integration package: it translates
+between Folio's `PageData` contract and one search provider while leaving
+configuration, UI, navigation, and document rendering to Folio.

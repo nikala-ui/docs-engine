@@ -1,0 +1,212 @@
+---
+title: Algolia
+description: Add Algolia-powered search to a Folio documentation site.
+order: 1
+---
+
+The official Algolia integration is published as
+`@nikala-ui/folio-algolia`. It connects Folio's search contract to an Algolia
+index and maps remote hits back to pages that exist in the current site.
+
+## Requirements
+
+- Folio `0.13.2` or newer;
+- an Algolia application and index;
+- an Algolia Search-Only API key;
+- records in the index that use the Folio page URL as `objectID`.
+
+Never expose an Algolia Admin API key or any key that can create, update, or
+delete records in a browser application.
+
+## Install the adapter
+
+Install the adapter in the Folio project, alongside Folio itself:
+
+```bash
+bun add @nikala-ui/folio @nikala-ui/folio-algolia
+```
+
+The package can also be installed with npm, pnpm, or yarn.
+
+## Configure environment variables
+
+Create a `.env` file in the consuming documentation project. Do not put these
+values in the adapter package or commit the file:
+
+```bash
+VITE_ALGOLIA_APP_ID=your_application_id
+VITE_ALGOLIA_SEARCH_KEY=your_search_only_key
+VITE_ALGOLIA_INDEX=your_index_name
+```
+
+The adapter also recognizes the equivalent runtime names
+`ALGOLIA_APP_ID`, `ALGOLIA_SEARCH_KEY`, and `ALGOLIA_INDEX`. The `VITE_*`
+names are useful when the configuration is evaluated by Vite and the browser
+needs the public values.
+
+The application ID, index name, and Search-Only key are intentionally public.
+An Admin API key is not public and must only be used by a trusted indexing
+process.
+
+## Select the provider
+
+Keep the site configuration small. Import the adapter package and select its
+exported adapter instance:
+
+```ts
+import { algoliaAdapter } from "@nikala-ui/folio-algolia";
+
+export default {
+  search: {
+    enabled: true,
+    provider: algoliaAdapter,
+  },
+};
+```
+
+The configuration does not contain Algolia requests, ranking logic, response
+mapping, or indexing code. Those responsibilities belong to the adapter and
+the indexing process.
+
+## Build the index
+
+The adapter package does not crawl documentation or upload records in the
+browser. Create one indexing script in the consuming Folio project and run it
+from a trusted server or CI job that has an Algolia Admin API key. You do not
+add indexing code to individual MDX pages.
+
+The script should load Folio's configuration, resolve the configured
+`contentDir`, scan the pages, and pass the complete page collection to the
+indexer:
+
+```ts
+// scripts/index-search.ts
+import path from "node:path";
+import { DEFAULT_DOCS_CONFIG, loadConfig } from "@nikala-ui/folio/config";
+import { scanContent } from "@nikala-ui/folio/content";
+import {
+  createAlgoliaIndexer,
+  getAlgoliaIndexerOptions,
+} from "@nikala-ui/folio-algolia/indexing";
+
+const projectRoot = process.cwd();
+const config = await loadConfig(projectRoot);
+const contentDir = path.resolve(
+  projectRoot,
+  config.contentDir ?? DEFAULT_DOCS_CONFIG.contentDir,
+);
+const pages = await scanContent(contentDir);
+const indexer = createAlgoliaIndexer(getAlgoliaIndexerOptions());
+const dryRun = process.argv.includes("--dry-run");
+
+const summary = await indexer.sync(pages, { dryRun });
+console.log(summary);
+```
+
+Run it from the documentation project's root:
+
+```bash
+bun run scripts/index-search.ts --dry-run
+bun run scripts/index-search.ts
+```
+
+The `--dry-run` option scans and maps the pages without uploading or deleting
+records. The regular run uploads the current catalog in batches. The indexer
+uses `toAlgoliaRecord` internally, so each record contains:
+
+- `objectID` — the stable Folio page URL;
+- `slug` and `url` — route identifiers;
+- `title` and `description` — searchable page metadata;
+- `metadata` — the page frontmatter;
+- `headings` — table-of-contents text from the page.
+
+The script follows the `contentDir` from `docs.config.ts`; it does not assume
+that the documentation directory is named `docs`. Keep the indexing script in
+the consumer project or in a separate private indexing service. Never ship
+`ALGOLIA_ADMIN_API_KEY` to the browser.
+
+### Full synchronization
+
+The default mode upserts the current pages. To also remove records that no
+longer exist in the current catalog, use full synchronization:
+
+```ts
+const summary = await indexer.sync(pages, {
+  mode: "full",
+  dryRun,
+});
+```
+
+Full synchronization reads the existing Algolia `objectID` values, uploads
+the current pages, and deletes stale records. Use it only with the Admin API
+key, and review a dry run before the first full sync.
+
+The indexer retries transient rate-limit and server errors. You can adjust
+`maxRetries` and `retryDelayMs` when creating the indexer if the indexing job
+needs different retry limits.
+
+## Alternative factory setup
+
+Most projects should use the exported `algoliaAdapter` instance. If the
+credentials come from another runtime configuration system, create the
+adapter explicitly:
+
+```ts
+import { createAlgoliaAdapter } from "@nikala-ui/folio-algolia";
+
+const provider = createAlgoliaAdapter({
+  appId: "your_application_id",
+  apiKey: "your_search_only_key",
+  indexName: "your_index_name",
+});
+
+export default {
+  search: {
+    provider,
+  },
+};
+```
+
+## Verify locally
+
+Start the documentation site and open the search dialog. Search for a word
+that appears in an indexed page title or heading:
+
+```bash
+bun run dev
+```
+
+In the browser's Network panel, the query should be sent to Algolia's search
+endpoint. A successful result should navigate to a page that exists in the
+current Folio page catalog. Hits from another site or stale records are
+ignored.
+
+An empty query does not make a network request and returns the current page
+catalog. If the remote request fails, Folio can keep the local catalog
+available as a fallback when local search data exists.
+
+## Troubleshooting
+
+### The adapter is not selected
+
+Confirm that `docs.config.ts` imports `algoliaAdapter` from
+`@nikala-ui/folio-algolia` and assigns it to `search.provider`. Installing
+the package alone does not change Folio's provider.
+
+### Required environment variable is missing
+
+Confirm that `.env` is in the documentation project root, the variable names
+are spelled correctly, and the dev server was restarted after changing the
+file.
+
+### Algolia returns no matching pages
+
+Confirm that the index contains the same URL values used by Folio as
+`objectID`, `url`, or `slug`. The adapter filters results against the
+current site's page catalog, so unrelated records are deliberately removed.
+
+### The request is rejected
+
+Check the application ID, index name, and Search-Only key. Also verify that
+the key is allowed to search the selected index and that the browser is not
+using an Admin key.

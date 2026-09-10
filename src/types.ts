@@ -136,6 +136,7 @@ export interface DocsConfig {
   shiki?: ShikiConfig;
   search?: {
     enabled?: boolean;
-    provider?: "local" | "pagefind" | "orama" | "algolia";
+    /** A provider name or a configured adapter instance. */
+    provider?: string | import("./search/provider.js").SearchAdapter;
   };
 }
