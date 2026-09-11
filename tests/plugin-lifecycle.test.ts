@@ -201,4 +201,40 @@ describe("plugin lifecycle manager", () => {
       expect((error as Error).message).toContain('mode "production"');
     }
   });
+
+  test("keeps Date and RegExp snapshot values immutable", async () => {
+    const sourceDate = new Date("2025-01-02T03:04:05.000Z");
+    const sourcePattern = /docs/gy;
+    sourcePattern.lastIndex = 1;
+    const sourcePage = {
+      ...page,
+      frontmatter: { title: "Start", metadata: { sourceDate, sourcePattern } },
+    } as FolioPage;
+    let received!: FolioPage;
+    const lifecycle = manager([{ name: "observer", pageCollected: (current) => { received = current; } }]);
+
+    await lifecycle.pageCollected(sourcePage);
+    const metadata = received.frontmatter.metadata as {
+      sourceDate: Date;
+      sourcePattern: RegExp;
+    };
+    expect(metadata.sourceDate).toBeInstanceOf(Date);
+    expect(metadata.sourceDate.getTime()).toBe(sourceDate.getTime());
+    const dateMutators = [
+      "setDate", "setFullYear", "setHours", "setMilliseconds", "setMinutes", "setMonth",
+      "setSeconds", "setTime", "setUTCDate", "setUTCFullYear", "setUTCHours",
+      "setUTCMilliseconds", "setUTCMinutes", "setUTCMonth", "setUTCSeconds", "setYear",
+    ];
+    for (const method of dateMutators) {
+      expect(() => (metadata.sourceDate as unknown as Record<string, (value: number) => void>)[method](0)).toThrow();
+    }
+    expect(metadata.sourceDate.getTime()).toBe(sourceDate.getTime());
+    expect(metadata.sourcePattern).toBeInstanceOf(RegExp);
+    expect(metadata.sourcePattern.flags).toBe("gy");
+    expect(() => metadata.sourcePattern.exec("docs")).not.toThrow();
+    expect(metadata.sourcePattern.lastIndex).toBe(1);
+    expect(() => metadata.sourcePattern.lastIndex = 0).toThrow();
+    expect(sourceDate.getTime()).toBe(Date.parse("2025-01-02T03:04:05.000Z"));
+    expect(sourcePattern.lastIndex).toBe(1);
+  });
 });

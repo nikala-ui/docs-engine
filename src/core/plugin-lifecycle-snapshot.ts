@@ -45,11 +45,60 @@ function immutableObject<T extends object>(value: T, seen: WeakMap<object, unkno
   return proxy;
 }
 
+const dateMutators = new Set([
+  "setDate", "setFullYear", "setHours", "setMilliseconds", "setMinutes", "setMonth",
+  "setSeconds", "setTime", "setUTCDate", "setUTCFullYear", "setUTCHours",
+  "setUTCMilliseconds", "setUTCMinutes", "setUTCMonth", "setUTCSeconds", "setYear",
+]);
+
+function immutableDate(value: Date, seen: WeakMap<object, unknown>): Date {
+  const target = new Date(value.getTime());
+  const proxy = new Proxy(target, {
+    get(current, property) {
+      const result = Reflect.get(current, property, current);
+      if (typeof result !== "function") return clone(result, seen);
+      if (typeof property === "string" && dateMutators.has(property)) {
+        return () => { throw new TypeError(IMMUTABLE_MESSAGE); };
+      }
+      return result.bind(current);
+    },
+    set() { throw new TypeError(IMMUTABLE_MESSAGE); },
+    deleteProperty() { throw new TypeError(IMMUTABLE_MESSAGE); },
+    defineProperty() { throw new TypeError(IMMUTABLE_MESSAGE); },
+  });
+  seen.set(value, proxy);
+  Object.freeze(target);
+  return proxy;
+}
+
+function immutableRegExp(value: RegExp, seen: WeakMap<object, unknown>): RegExp {
+  const target = new RegExp(value.source, value.flags);
+  target.lastIndex = value.lastIndex;
+  const proxy = new Proxy(target, {
+    get(current, property) {
+      const result = Reflect.get(current, property, current);
+      if (typeof result !== "function") return clone(result, seen);
+      if (property === "compile") return () => { throw new TypeError(IMMUTABLE_MESSAGE); };
+      return (...args: unknown[]) => {
+        const working = new RegExp(current.source, current.flags);
+        working.lastIndex = current.lastIndex;
+        return Reflect.apply(result, working, args);
+      };
+    },
+    set() { throw new TypeError(IMMUTABLE_MESSAGE); },
+    deleteProperty() { throw new TypeError(IMMUTABLE_MESSAGE); },
+    defineProperty() { throw new TypeError(IMMUTABLE_MESSAGE); },
+  });
+  seen.set(value, proxy);
+  Object.freeze(target);
+  return proxy;
+}
+
 function clone(value: unknown, seen: WeakMap<object, unknown>): unknown {
   if (value === null || typeof value !== "object") return value;
   if (seen.has(value)) return seen.get(value);
-  if (value instanceof Date) return new Date(value);
-  if (value instanceof RegExp) return new RegExp(value);
+  if (value instanceof Date) return immutableDate(value, seen);
+  if (value instanceof RegExp) return immutableRegExp(value, seen);
   if (value instanceof Map) {
     const copy = new ImmutableMap<unknown, unknown>([]);
     seen.set(value, copy);
