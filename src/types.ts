@@ -15,6 +15,8 @@ export interface Frontmatter {
   icon?: string;
   badge?: string;
   addedAt?: string;
+  updatedAt?: string;
+  noindex?: boolean;
   prev?: string | { title: string; href: string } | boolean;
   next?: string | { title: string; href: string } | boolean;
   toc?: boolean;
@@ -106,6 +108,19 @@ export interface ShikiConfig {
   langs?: string[];
 }
 
+export interface DocsSeoConfig {
+  /** Social preview image path or URL. */
+  image?: string;
+  /** Accessible alternative text for the social preview image. */
+  imageAlt?: string;
+  /** Site name used by social metadata. Defaults to the configured title. */
+  siteName?: string;
+  /** Open Graph locale. Defaults to `en_US`. */
+  locale?: string;
+  /** Twitter/X card type. */
+  twitterCard?: "summary" | "summary_large_image";
+}
+
 export interface DocsConfig {
   title?: string;
   description?: string;
@@ -133,6 +148,7 @@ export interface DocsConfig {
   sidebar?: SidebarItem[] | "auto";
   navigation?: DocsNavigationConfig;
   theme?: DocsThemeConfig;
+  seo?: DocsSeoConfig;
   shiki?: ShikiConfig;
   search?: {
     enabled?: boolean;

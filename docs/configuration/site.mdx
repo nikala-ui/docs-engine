@@ -9,6 +9,12 @@ export default {
   title: "Project Documentation",
   description: "Reference and guides for the project.",
   siteUrl: "https://docs.example.com",
+  seo: {
+    image: "/social-card.png",
+    imageAlt: "Project Docs documentation",
+    locale: "en_US",
+    twitterCard: "summary_large_image",
+  },
   favicon: "/favicon.ico",
   contentDir: "docs",
   css: "src/index.css",
@@ -23,6 +29,14 @@ export default {
 - `title` is used in the navbar and browser titles.
 - `description` is the fallback description for pages without frontmatter.
 - `siteUrl` enables canonical URLs in generated HTML.
+- A page can set `updatedAt` in frontmatter to include an ISO date in the
+  sitemap.
+- A page can set `noindex: true` in frontmatter to emit a `noindex` robots meta
+  tag and exclude the page from the sitemap.
+- `seo.image` and `seo.imageAlt` configure social preview metadata.
+- `seo.siteName` optionally overrides the site `title` used in social and
+  structured metadata.
+- `seo.locale` and `seo.twitterCard` configure social metadata defaults.
 - `favicon` sets the favicon path or URL.
 - `contentDir` selects the MDX directory. The default is `docs`.
 - `css` points to a consumer-owned CSS entrypoint.

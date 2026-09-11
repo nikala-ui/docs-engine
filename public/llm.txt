@@ -1,0 +1,558 @@
+# Folio
+
+> Folio is a file-based documentation engine for SolidJS projects. It turns a
+> configurable directory of MDX files into a server-rendered documentation
+> site with navigation, search, syntax highlighting, themes, page actions, and
+> a CLI for project initialization.
+
+Folio is published as `@nikala-ui/folio`. It is built with Vite, SolidJS,
+Tailwind CSS v4, and MDX. The default theme uses Nikala UI components, while
+the content, configuration, CSS, theme, and public assets remain owned by the
+consumer project.
+
+## What Folio provides
+
+- File-based MDX routes from a configurable content directory.
+- Server-rendered production pages with client-side navigation.
+- Automatic filesystem-based sidebar navigation.
+- Explicit sidebar trees for projects that need custom grouping or ordering.
+- Optional top navigation and a responsive default documentation layout.
+- Local search by title, URL, and description without a hosted service.
+- A provider contract for external search adapters such as Algolia.
+- Shiki syntax highlighting with configurable themes and language allowlists.
+- Custom themes, layouts, components, CSS, logos, favicons, and site metadata.
+- Table of contents, breadcrumbs, previous/next navigation, source links, and
+  configurable page actions.
+- A CLI that initializes a complete documentation project.
+- Production build, preview, and static deployment workflows.
+
+## Install and initialize
+
+Install Folio in an existing project:
+
+```bash
+# Bun
+bun add @nikala-ui/folio
+
+# npm
+npm install @nikala-ui/folio
+
+# pnpm
+pnpm add @nikala-ui/folio
+
+# Yarn
+yarn add @nikala-ui/folio
+```
+
+Initialize from the project root:
+
+```bash
+# Bun
+bunx @nikala-ui/folio init .
+
+# npm
+npx @nikala-ui/folio init .
+
+# pnpm
+pnpm dlx @nikala-ui/folio init .
+
+# Yarn
+yarn dlx @nikala-ui/folio init .
+```
+
+The initializer creates or prepares:
+
+```text
+.
+├── docs/
+│   └── index.mdx
+├── docs.config.ts
+├── nikala.config.json
+├── public/
+│   └── favicon.ico
+└── src/
+    ├── components/ui/
+    ├── hooks/
+    ├── index.css
+    ├── lib/
+    ├── providers/
+    └── themes/default/
+```
+
+Existing `docs.config.ts` and `nikala.config.json` files are preserved. The
+initializer installs the dependencies required by the generated project and
+adds `dev`, `build`, and `preview` scripts when those scripts do not already
+exist.
+
+## Run the documentation site
+
+From the documentation project root:
+
+```bash
+bun run dev       # Start the development server
+bun run build     # Build the production site
+bun run preview   # Preview the production build
+```
+
+The default development server runs at `http://localhost:1862/`. The CLI
+commands can also be invoked directly:
+
+```bash
+bunx @nikala-ui/folio dev
+bunx @nikala-ui/folio build
+bunx @nikala-ui/folio preview
+```
+
+The equivalent `npm run`, `pnpm run`, and `yarn` commands are supported when
+the project uses those package managers.
+
+## Minimal configuration
+
+Create `docs.config.ts` in the project root:
+
+```ts
+import type { DocsConfig } from "@nikala-ui/folio";
+
+const config: DocsConfig = {
+  title: "Project Documentation",
+  description: "Documentation for my SolidJS project.",
+  contentDir: "docs",
+};
+
+export default config;
+```
+
+Folio uses `docs/` when `contentDir` is omitted. Configuration paths are
+resolved from the consuming project root, not from Folio's installed package.
+
+## Configuration reference
+
+`DocsConfig` supports the following top-level options:
+
+### Site metadata
+
+```ts
+{
+  title: "Project Documentation",
+  description: "Reference and guides for the project.",
+  siteUrl: "https://docs.example.com",
+  favicon: "/favicon.ico",
+  contentDir: "docs",
+  css: "src/index.css",
+  logo: {
+    text: "Project Docs",
+    image: "/logo.svg",
+    href: "/",
+  },
+}
+```
+
+- `title` is used in the navbar, browser title, and fallback page metadata.
+- `description` is the fallback description when a page has no description.
+- `siteUrl` is used for canonical URLs in generated HTML.
+- `favicon` is a URL or public asset path.
+- `contentDir` selects the MDX content directory and defaults to `docs`.
+- `css` selects a consumer-owned CSS entrypoint.
+- `logo.image` must point to an asset served from the consumer project's
+  `public/` directory.
+
+### Navigation layout
+
+```ts
+{
+  navigation: {
+    layout: "sidebar",
+    navbar: [
+      { title: "Home", href: "/" },
+      { title: "Guides", href: "/guides" },
+      { title: "GitHub", href: "https://github.com/example/project", external: true },
+    ],
+    sidebar: {
+      nav: "auto",
+      header: true,
+      footer: false,
+      headerSubtitle: "Developer Documentation",
+      footerText: "Project Docs",
+    },
+  },
+}
+```
+
+- `navigation.layout` is `"sidebar"` by default. Use `"top"` for top-only
+  navigation.
+- `navigation.navbar` defines top-level links.
+- `navigation.sidebar.nav` is `"auto"` by default and derives the tree from
+  the content filesystem. It can also be an explicit `SidebarItem[]` tree.
+- `header` and `footer` control the default sidebar header and footer.
+- `headerSubtitle` and `footerText` customize sidebar text.
+
+The legacy `nav` and `sidebar` top-level options remain available for
+backward compatibility. New projects should use `navigation.navbar` and
+`navigation.sidebar`.
+
+### Home page and page actions
+
+```ts
+{
+  home: {
+    layout: "docs",
+    showSidebar: true,
+    showNavbar: true,
+    showBreadcrumbs: true,
+    showToc: false,
+    showPager: true,
+  },
+  pageActions: {
+    copyPage: true,
+    copyMarkdown: true,
+    ai: [
+      {
+        name: "ChatGPT",
+        url: "https://chatgpt.com/?q={prompt}",
+        prompt: "Explain {title} using {url}.",
+      },
+    ],
+  },
+}
+```
+
+`home.layout` may be `"docs"` or `"landing"`. Page actions can expose page
+copying, Markdown export, and external AI assistant links. AI provider URLs
+and prompts support `{url}`, `{content}`, and `{title}` placeholders.
+
+### Theme and CSS
+
+```ts
+{
+  theme: {
+    path: "./src/themes/default",
+    defaultMode: "system",
+  },
+}
+```
+
+- `theme.path` points to a consumer-owned theme directory or theme entrypoint.
+- `defaultMode` can be `"light"`, `"dark"`, or `"system"`.
+
+The generated `src/index.css` is the Tailwind CSS v4 entrypoint. Use semantic
+design tokens such as `bg-background`, `text-foreground`, `bg-primary`, and
+`border-border` instead of hardcoded application colors.
+
+### Syntax highlighting
+
+```ts
+{
+  shiki: {
+    themes: {
+      light: "github-light",
+      dark: "github-dark",
+    },
+    langs: ["typescript", "tsx", "bash", "json"],
+  },
+}
+```
+
+`themes` selects the Shiki light and dark themes. `langs` optionally restricts
+the supported language set; languages are loaded on demand.
+
+### Search
+
+Local search is the default:
+
+```ts
+{
+  search: {
+    enabled: true,
+    provider: "local",
+  },
+}
+```
+
+Local search matches page title, URL, and description. Set `enabled: false`
+to remove the search trigger and default keyboard shortcut.
+
+External search providers are separate adapter packages. The configuration
+should only import and select an adapter instance; provider request and
+ranking logic does not belong in `docs.config.ts`:
+
+```ts
+import { createAlgoliaAdapter } from "@nikala-ui/folio-algolia";
+
+const provider = createAlgoliaAdapter({
+  appId: import.meta.env.PUBLIC_ALGOLIA_APP_ID,
+  apiKey: import.meta.env.PUBLIC_ALGOLIA_SEARCH_KEY,
+  indexName: import.meta.env.PUBLIC_ALGOLIA_INDEX,
+});
+
+export default {
+  search: {
+    enabled: true,
+    provider,
+  },
+};
+```
+
+Use a browser-safe search-only key in the client configuration. Never expose
+an Admin API key, indexing key, or private credential to the browser. Index
+creation and record synchronization belong in a trusted server or CI job.
+
+The Folio adapter contract is:
+
+```ts
+interface SearchAdapter {
+  name: string;
+  search(context: {
+    query: string;
+    pages: PageData[];
+  }): PageData[] | Promise<PageData[]>;
+}
+```
+
+An adapter receives the current query and Folio's local page catalog. It must
+return Folio page records so the default theme can navigate to existing local
+routes. An external adapter should map remote hits back to `url`, `slug`, or
+another stable page identifier and should handle network failures, malformed
+responses, rate limits, and stale requests.
+
+See `/search/algolia` for the complete Algolia integration and
+`/contributing/search-adapters` for the adapter authoring contract.
+
+## Content and routes
+
+Every `.md`, `.mdx`, or supported content file in `contentDir` becomes a
+documentation route. The default mapping is:
+
+```text
+docs/index.mdx                  -> /
+docs/getting-started.mdx        -> /getting-started
+docs/components/button.mdx      -> /components/button
+docs/guides/index.mdx           -> /guides
+```
+
+Directories become filesystem navigation categories in automatic sidebar
+mode. An `index.mdx` file acts as the category overview page.
+
+Use frontmatter for page metadata:
+
+```mdx
+---
+title: Installation
+description: Install Folio and create your first documentation site.
+order: 1
+categoryOrder: 1
+icon: package
+badge: New
+addedAt: 2026-09-05
+toc: true
+prev: /
+next: /configuration
+---
+
+# Installation
+
+Page content is written in MDX.
+```
+
+Supported metadata includes:
+
+- `title`: displayed page title and navigation label.
+- `description`: page summary and search metadata.
+- `order`: order within the current directory.
+- `categoryOrder`: order for a category overview in navigation.
+- `icon`: Lucide icon name used by the default sidebar.
+- `badge`: short navigation badge.
+- `addedAt`: `YYYY-MM-DD` publication date used for the recent-page marker.
+- `toc`: enables the page table of contents when `true`.
+- `prev`: previous route or navigation object.
+- `next`: next route or navigation object.
+- Additional frontmatter keys are preserved in `metadata` for integrations.
+
+## Explicit sidebar navigation
+
+Use an explicit sidebar when filesystem order is not the desired information
+architecture:
+
+```ts
+export default {
+  navigation: {
+    sidebar: {
+      nav: [
+        { title: "Getting Started", href: "/getting-started" },
+        {
+          title: "Themes",
+          items: [
+            { title: "Colors", href: "/themes/colors" },
+          ],
+        },
+      ],
+    },
+  },
+};
+```
+
+Internal `href` values must point to existing documentation routes. Invalid or
+external sidebar links fail validation. Use `"auto"` or omit the property to
+return to filesystem-based navigation.
+
+## Repository source links
+
+Configure a repository to add a `View source` link to documentation pages:
+
+```ts
+export default {
+  repository: {
+    url: "https://github.com/example/project",
+    branch: "main",
+    rootDir: "",
+  },
+};
+```
+
+`branch` defaults to `main`. Set `rootDir` when the docs are nested in a
+monorepo, for example `apps/docs`. GitHub, GitLab, and Bitbucket repository
+URLs are supported.
+
+## Public assets
+
+Assets owned by a documentation consumer belong in its root `public/`
+directory and are referenced with site-root paths:
+
+```text
+public/logo.svg       -> /logo.svg
+public/favicon.ico    -> /favicon.ico
+```
+
+Folio's own packaged public assets live under `src/client/public` and are
+copied into the built client. In local source development, Folio serves this
+directory directly; in a generated consumer project, the consumer's
+`public/` directory takes precedence.
+
+## Package exports
+
+The main package exports Folio's public types and runtime helpers. Supported
+subpath exports include:
+
+```ts
+import type { DocsConfig, PageData, SearchAdapter } from "@nikala-ui/folio";
+import type { DocsConfig } from "@nikala-ui/folio/config";
+import { scanContent } from "@nikala-ui/folio/content";
+import { defaultTheme } from "@nikala-ui/folio/theme";
+```
+
+The package also exposes the default theme and theme subpaths through the
+`@nikala-ui/folio/themes/*` export pattern. Prefer documented public exports;
+do not import files from `dist` internals.
+
+## Customization model
+
+Folio owns the engine runtime and default theme implementation. A generated
+consumer project owns:
+
+- the MDX content directory;
+- `docs.config.ts` and project metadata;
+- `public/` assets;
+- the CSS entrypoint and design tokens;
+- copied UI components, hooks, and theme files;
+- custom search adapters and indexing jobs.
+
+To customize the default visual system, edit the generated theme or provide a
+custom `theme.path`. Keep framework configuration in the consuming project;
+do not hardcode application-specific URLs, providers, credentials, or content
+directories in Folio itself.
+
+## Build and deployment
+
+The production build generates a static site bundle and SSR assets:
+
+```bash
+bun run build
+bun run preview
+```
+
+The output directory is controlled by the CLI build command and defaults to
+`dist`. Public assets are copied into the output. A hosting platform can serve
+the generated static files or run the SSR preview/server entrypoint according
+to its adapter and deployment model.
+
+For a self-hosted Folio repository, the complete quality contract is:
+
+```bash
+bun run typecheck
+bun run test
+bun run test:browser
+bun run test:generated
+bun run package:check
+bun run bundle:check
+bun run check
+```
+
+## Security rules
+
+- Never ship Algolia Admin API keys or indexing credentials to the browser.
+- Keep indexing in a trusted server or CI job.
+- Treat external adapter responses as untrusted data.
+- Keep generated module values safely serialized when creating virtual
+  JavaScript modules.
+- Validate configured repository and sidebar paths before generating links.
+- Keep consumer-owned content, CSS, themes, and public assets separate from
+  Folio package internals.
+
+## Common troubleshooting
+
+### The site cannot find content
+
+Check that `contentDir` points to the directory containing the MDX files and
+that the path is relative to the documentation project root. If omitted,
+Folio uses `docs/`.
+
+### The sidebar order is unexpected
+
+Automatic navigation follows filesystem categories and frontmatter ordering.
+Use `order`, `categoryOrder`, or an explicit `navigation.sidebar.nav` tree.
+
+### A custom theme is ignored
+
+Verify that `theme.path` is resolved from the consumer project root and points
+to the theme directory or entrypoint that exists there.
+
+### Search uses local results
+
+Confirm that `search.provider` contains an imported adapter instance, not just
+an installed package name or unsupported string. Check the adapter's public
+environment variables and restart the dev server after changing them.
+
+### Algolia returns no matching pages
+
+Confirm that the browser uses the correct application ID, index name, and
+Search-Only key. The index must contain records whose `objectID`, `url`, or
+`slug` matches Folio page routes. Run indexing separately with an Admin API
+key and never put that key in `docs.config.ts` or a browser environment.
+
+### Code highlighting is missing
+
+Check the language name and optional `shiki.langs` allowlist. If an allowlist
+is configured, include the language used by the code block.
+
+### Public assets are broken in local development
+
+Reference assets from the site root, such as `/logo.svg`, not
+`/public/logo.svg`. Restart the dev server after adding or moving a public
+asset.
+
+## Canonical documentation
+
+- `/getting-started` — installation and first project setup.
+- `/configuration` — configuration overview.
+- `/configuration/site` — site metadata and repository links.
+- `/configuration/navigation` — navbar and sidebar configuration.
+- `/configuration/search` — local search and adapter selection.
+- `/search/algolia` — Algolia setup, indexing, and troubleshooting.
+- `/contributing/search-adapters` — search adapter package contract.
+- `/themes` — theme configuration and customization.
+- `/contributing` — development and contribution workflow.
+
+## Source and community
+
+- Repository: https://github.com/nikala-ui/folio
+- Package: https://www.npmjs.com/package/@nikala-ui/folio
+- License: MIT
