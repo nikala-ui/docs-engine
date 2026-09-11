@@ -74,6 +74,12 @@ export interface DocsNavigationConfig {
     footer?: boolean;
     headerSubtitle?: string;
     footerText?: string;
+    promo?: {
+      title: string;
+      description: string;
+      href: string;
+      cta?: string;
+    };
   };
 }
 

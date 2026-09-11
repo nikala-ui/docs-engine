@@ -45,6 +45,12 @@ const config: DocsConfig = {
       footer: false,
       headerSubtitle: "Documentation Engine",
       footerText: "Folio",
+      promo: {
+        title: "Build with Nikala UI",
+        description: "Copy-paste SolidJS components built for Tailwind CSS v4.",
+        href: "https://nikala.dev",
+        cta: "Explore Nikala UI",
+      },
     },
   },
   search: {

@@ -14,6 +14,7 @@ import { DocsSearchDialog } from "./overlays/search-dialog.jsx";
 import { cn } from "@/lib/cn";
 import { buttonVariants } from "@/components/ui/button";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardTitle } from "@/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,7 +22,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { createClipboard } from "@/hooks/create-clipboard";
-import { Copy, FileText, ChevronDown, ExternalLink } from "lucide-solid";
+import { Copy, FileText, ChevronDown, ExternalLink, Sparkles } from "lucide-solid";
 import { pageToMarkdown, pageToText, resolvePageActionUrl, sourceToMarkdown } from "../../client/page-actions.js";
 import { getRepositorySourceUrl } from "../../navigation/repository-links.js";
 import { resolveSearchProvider } from "../../search/provider.js";
@@ -62,6 +63,7 @@ export const DocsLayout: ParentComponent<DocsLayoutProps> = (props) => {
   const sidebarLayout = () => local.config.navigation?.layout !== "top";
   const sidebarHeader = () => local.config.navigation?.sidebar?.header !== false;
   const sidebarFooter = () => local.config.navigation?.sidebar?.footer !== false;
+  const sidebarPromo = () => local.config.navigation?.sidebar?.promo;
   const sourceUrl = () => {
     const page = local.currentPage;
     const repository = local.config.repository;
@@ -190,8 +192,31 @@ export const DocsLayout: ParentComponent<DocsLayoutProps> = (props) => {
           </Show>
         </Container>
         <Show when={showToc() && local.currentPage?.url} keyed>
-          <Container as="aside" size="sm" class="hidden xl:block w-64 shrink-0 self-start px-0 sticky top-14 z-10 h-fit max-h-[calc(100vh-3.5rem)] overflow-hidden bg-background">
-            <DocsTableOfContents items={local.toc!} class="max-h-[calc(100vh-3.5rem)]" />
+          <Container as="aside" size="sm" class="hidden xl:block w-64 shrink-0 self-start px-0 sticky top-14 z-10 h-fit max-h-[calc(100vh-3.5rem)] overflow-y-auto bg-background">
+            <div class="flex flex-col gap-5">
+              <DocsTableOfContents items={local.toc!} class="max-h-none" />
+              <Show when={sidebarPromo()}>
+                {(promo) => (
+                  <Card class="border-primary/30 bg-primary/5 shadow-none">
+                    <CardContent class="p-4">
+                      <CardTitle class="text-sm">{promo().title}</CardTitle>
+                      <CardDescription class="mt-2 text-xs leading-relaxed">
+                        {promo().description}
+                      </CardDescription>
+                      <a
+                        href={promo().href}
+                        target="_blank"
+                        rel="noreferrer"
+                        class={cn(buttonVariants({ variant: "outline", size: "sm" }), "mt-4 h-8 w-full gap-1.5 text-xs")}
+                      >
+                        {promo().cta || "Learn more"}
+                        <ExternalLink class="size-3" aria-hidden="true" />
+                      </a>
+                    </CardContent>
+                  </Card>
+                )}
+              </Show>
+            </div>
           </Container>
         </Show>
       </Container>
