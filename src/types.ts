@@ -1,6 +1,7 @@
 // packages/docs/src/types.ts
 
 import type { Component } from "solid-js";
+import type { FolioPluginConfig } from "./plugin.js";
 
 export type DocsIcon = Component<{
   class?: string;
@@ -161,4 +162,5 @@ export interface DocsConfig {
     /** A provider name or a configured adapter instance. */
     provider?: string | import("./search/provider.js").SearchAdapter;
   };
+  plugins?: FolioPluginConfig;
 }
