@@ -170,6 +170,32 @@
   * {
     border-color: var(--border);
   }
+
+  * {
+    scrollbar-color: color-mix(in oklch, var(--primary) 42%, var(--border)) transparent;
+    scrollbar-width: thin;
+  }
+
+  *::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    background: color-mix(in oklch, var(--primary) 42%, var(--border));
+    border: 1px solid transparent;
+    border-radius: 999px;
+    background-clip: padding-box;
+  }
+
+  *::-webkit-scrollbar-thumb:hover {
+    background: var(--primary);
+  }
+
   body {
     background-color: var(--background);
     color: var(--foreground);
