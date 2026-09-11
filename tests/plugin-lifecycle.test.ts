@@ -118,7 +118,9 @@ describe("plugin lifecycle manager", () => {
   test("deeply snapshots maps, sets, arrays, plain objects, and providers", async () => {
     class Provider {
       name = "custom";
+      self = this;
       search() { return []; }
+      currentName() { return this.name; }
       mutate() { this.name = "changed"; }
     }
     const provider = new Provider();
@@ -151,7 +153,11 @@ describe("plugin lifecycle manager", () => {
     await lifecycle.buildStart();
     const exposedProvider = context.config.search?.provider as Provider;
     expect(exposedProvider).toBeInstanceOf(Provider);
+    expect(Object.getPrototypeOf(exposedProvider)).toBe(Provider.prototype);
+    expect(exposedProvider.self).toBe(exposedProvider);
+    expect(context.config.search?.provider).toBe(exposedProvider);
     expect(exposedProvider.search()).toEqual([]);
+    expect(exposedProvider.currentName()).toBe("custom");
     expect(() => exposedProvider.mutate()).toThrow();
     expect(() => exposedProvider.name = "changed").toThrow();
     expect(provider.name).toBe("custom");
