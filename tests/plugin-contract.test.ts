@@ -4,9 +4,9 @@ import {
   createFolioPlugin,
   defineFolioPlugin,
   validateFolioPlugins,
-} from "../src/index.js";
-import { nikalaDocs } from "../src/index.js";
-import type { FolioPlugin } from "../src/index.js";
+} from "../src/plugin.js";
+import { nikalaDocsPlugin } from "../src/server/plugin.js";
+import type { FolioPlugin } from "../src/plugin.js";
 
 describe("public Folio plugin contract", () => {
   test("keeps plugin-less configs compatible", () => {
@@ -38,6 +38,6 @@ describe("public Folio plugin contract", () => {
   test("exports the public contract without replacing the Vite plugin", () => {
     const plugin = { name: "example", configResolved: async () => undefined } satisfies FolioPlugin;
     expect(defineDocsConfig({ plugins: [plugin] }).plugins?.[0]).toBe(plugin);
-    expect(nikalaDocs().name).toBe("vite-plugin-folio");
+    expect(nikalaDocsPlugin().name).toBe("vite-plugin-folio");
   });
 });
