@@ -94,6 +94,37 @@ or external sidebar links fail the build with a clear configuration error.
 Omit `navigation.sidebar.nav`, or set it to `"auto"`, to return to filesystem
 navigation.
 
+## Sidebar promo card
+
+The default theme can render an optional promotional card below the desktop
+“On this page” table of contents. It is disabled unless
+`navigation.sidebar.promo` is configured:
+
+```ts
+export default {
+  navigation: {
+    sidebar: {
+      promo: {
+        title: "Build better interfaces",
+        description: "Explore the tools and components for your next project.",
+        href: "https://example.com",
+        cta: "Learn more",
+      },
+    },
+  },
+};
+```
+
+The fields are:
+
+- `title`: The card heading.
+- `description`: The short supporting message.
+- `href`: The destination opened by the card action.
+- `cta` (optional): The action label. It defaults to `Learn more`.
+
+Remove the `promo` object to hide the card completely. The card is only
+shown on desktop pages that have an “On this page” table of contents.
+
 ## Top navigation links
 
 ```ts
