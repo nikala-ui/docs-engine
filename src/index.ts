@@ -1,14 +1,5 @@
 // packages/docs/src/index.ts
 export * from "./types.js";
-export type {
-  FolioBuildResult,
-  FolioPage,
-  FolioPlugin,
-  FolioPluginConfig,
-  FolioPluginContext,
-  FolioPluginFactory,
-  FolioPluginLogger,
-} from "./plugin.js";
 export type { SearchAdapter, SearchContext } from "./search/provider.js";
 export * from "./navigation/index.js";
 export * from "./config.js";
