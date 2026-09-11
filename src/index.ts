@@ -20,7 +20,10 @@ export {
   FolioPluginHookError,
   FolioPluginLifecycleManager,
 } from "./core/plugin-lifecycle.js";
-export type { FolioPluginLifecycleOptions } from "./core/plugin-lifecycle.js";
+export type {
+  FolioPluginHookMetadata,
+  FolioPluginLifecycleOptions,
+} from "./core/plugin-lifecycle.js";
 export type { SearchAdapter, SearchContext } from "./search/provider.js";
 export * from "./navigation/index.js";
 export * from "./config.js";

@@ -48,7 +48,7 @@ export class FolioPluginHookError extends Error {
     pluginName: string,
     hook: LifecycleHook,
     cause: unknown,
-    mode: FolioPluginContext["mode"],
+    mode: FolioPluginContext["mode"] = "production",
     page?: FolioPage,
   ) {
     const detail = cause instanceof Error ? cause.message : String(cause);
