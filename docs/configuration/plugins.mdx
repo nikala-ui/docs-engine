@@ -4,8 +4,9 @@ description: Extend Folio with typed build-time plugins.
 order: 7
 ---
 
-Folio plugins are build-time extensions with typed registration and lifecycle
-hooks.
+Folio plugins expose a typed lifecycle API for build tooling. This milestone
+provides the standalone lifecycle manager; wiring those hooks into Folio's
+build command is a separate milestone.
 
 ## Register a plugin
 
@@ -45,8 +46,10 @@ error.
 - `generate(context)`
 - `buildEnd(result, context)`
 
-The context and result types are exported from `@nikala-ui/folio`, and Folio
-invokes these hooks during the build lifecycle. Hook inputs are immutable
-snapshots, so plugins cannot mutate Folio's configuration or collected page
-data. Plugin packages should keep feature-specific behavior (such as i18n,
-API documentation, or workspace discovery) outside the core package.
+The context and result types are exported from `@nikala-ui/folio`. The
+standalone lifecycle manager invokes these hooks when called by an integrating
+build tool; Folio's build command does not wire them in yet. Hook inputs are
+immutable snapshots, so plugins cannot mutate Folio's configuration or
+collected page data. Plugin packages should keep feature-specific behavior
+(such as i18n, API documentation, or workspace discovery) outside the core
+package.
