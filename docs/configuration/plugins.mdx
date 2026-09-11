@@ -1,0 +1,87 @@
+---
+title: Plugins
+description: Extend Folio with typed plugins and lifecycle hooks.
+order: 7
+---
+
+Folio plugins extend the documentation build without replacing Folio's Vite
+plugin. Add them to the `plugins` field in `docs.config.ts` and use the
+`FolioPlugin` contract from `@nikala-ui/folio`.
+
+## Define a plugin
+
+A plugin has a required, non-empty `name`. The remaining fields are optional
+lifecycle hooks. Hooks may be synchronous or asynchronous:
+
+```ts
+import type { FolioPlugin } from "@nikala-ui/folio";
+
+const reportPlugin: FolioPlugin = {
+  name: "build-report",
+
+  configResolved(context) {
+    context.logger.info(`Building ${context.config.title ?? "Folio"}`);
+  },
+
+  buildStart(context) {
+    context.logger.debug(`Reading pages from ${context.contentDir}`);
+  },
+
+  pageCollected(page, context) {
+    context.logger.debug(`Collected ${page.url} in ${context.mode} mode`);
+  },
+
+  pageTransformed(page) {
+    return page;
+  },
+
+  generate(context) {
+    context.logger.info(`Generating ${context.pages.length} pages`);
+  },
+
+  buildEnd(result, context) {
+    context.logger.info(
+      `${result.success ? "Built" : "Failed"} ${context.pages.length} pages`,
+    );
+  },
+};
+
+export default {
+  plugins: [reportPlugin],
+};
+```
+
+## Lifecycle hooks
+
+Folio invokes hooks in this order during a build:
+
+1. `configResolved` receives the merged configuration and runtime context.
+2. `buildStart` runs before page collection.
+3. `pageCollected` runs for each discovered page.
+4. `pageTransformed` can return the transformed page for each page.
+5. `generate` runs before the output is generated.
+6. `buildEnd` receives the final result after generation.
+
+The context includes the resolved `config`, project paths, the current `mode`,
+the collected `pages`, and a structured `logger`. `pageTransformed` must
+return a page; the other hooks may return `void` or a promise.
+
+## Plugin name validation
+
+Plugin names are validated when the configuration is defined and again when a
+configuration file is loaded at runtime. Names must be strings containing at
+least one non-whitespace character:
+
+```ts
+export default {
+  plugins: [
+    { name: "   " }, // invalid
+    { name: 42 }, // invalid
+    { name: "valid-plugin" }, // valid
+  ],
+};
+```
+
+An invalid plugin name stops configuration loading with a validation error.
+Use a stable, descriptive name for each plugin so it can be identified in
+logs and diagnostics.
