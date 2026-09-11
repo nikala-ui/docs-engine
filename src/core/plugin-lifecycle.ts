@@ -7,15 +7,17 @@ import type {
 } from "../plugin.js";
 import { validateFolioPlugins } from "../plugin.js";
 import type { DocsConfig } from "../types.js";
+import {
+  FolioPluginHookError,
+  type FolioPluginHookMetadata,
+  type LifecycleHook,
+} from "./plugin-lifecycle-error.js";
+import { snapshot } from "./plugin-lifecycle-snapshot.js";
 
-type LifecycleHook =
-  | "configResolved"
-  | "buildStart"
-  | "pageCollected"
-  | "pageTransformed"
-  | "generate"
-  | "buildEnd";
 type ContextHook = "configResolved" | "buildStart" | "generate";
+
+export type { FolioPluginHookMetadata, LifecycleHook } from "./plugin-lifecycle-error.js";
+export { FolioPluginHookError } from "./plugin-lifecycle-error.js";
 
 export interface FolioPluginLifecycleOptions {
   plugins?: readonly FolioPlugin[];
@@ -25,177 +27,6 @@ export interface FolioPluginLifecycleOptions {
   mode: FolioPluginContext["mode"];
   logger: FolioPluginLogger;
   pages?: readonly FolioPage[];
-}
-
-export interface FolioPluginHookMetadata {
-  pluginName: string;
-  hook: LifecycleHook;
-  mode: FolioPluginContext["mode"];
-  pageRoute?: string;
-  sourcePath?: string;
-}
-
-export class FolioPluginHookError extends Error {
-  readonly pluginName: string;
-  readonly hook: LifecycleHook;
-  readonly mode: FolioPluginContext["mode"];
-  readonly pageRoute?: string;
-  readonly sourcePath?: string;
-  readonly metadata: FolioPluginHookMetadata;
-  override readonly cause: unknown;
-
-  constructor(
-    pluginName: string,
-    hook: LifecycleHook,
-    cause: unknown,
-    mode: FolioPluginContext["mode"] = "production",
-    page?: FolioPage,
-  ) {
-    const detail = cause instanceof Error ? cause.message : String(cause);
-    const pageRoute = page?.url;
-    const sourcePath = page?.sourcePath ?? page?.filePath;
-    const location = [
-      pageRoute && `route "${pageRoute}"`,
-      sourcePath && `source "${sourcePath}"`,
-      `mode "${mode}"`,
-    ].join(", ");
-    super(`[folio] Plugin "${pluginName}" hook "${hook}" failed (${location}): ${detail}`, { cause });
-    this.name = "FolioPluginHookError";
-    this.pluginName = pluginName;
-    this.hook = hook;
-    this.mode = mode;
-    this.pageRoute = pageRoute;
-    this.sourcePath = sourcePath;
-    this.metadata = { pluginName, hook, mode, pageRoute, sourcePath };
-    this.cause = cause;
-  }
-}
-
-class ImmutableMap<K, V> extends Map<K, V> {
-  constructor(entries: readonly (readonly [K, V])[]) {
-    super();
-    for (const [key, value] of entries) Map.prototype.set.call(this, key, value);
-  }
-
-  override set(): this {
-    throw new TypeError("Cannot mutate an immutable plugin snapshot");
-  }
-
-  override delete(): boolean {
-    throw new TypeError("Cannot mutate an immutable plugin snapshot");
-  }
-
-  override clear(): void {
-    throw new TypeError("Cannot mutate an immutable plugin snapshot");
-  }
-}
-
-class ImmutableSet<T> extends Set<T> {
-  constructor(values: readonly T[]) {
-    super();
-    for (const value of values) Set.prototype.add.call(this, value);
-  }
-
-  override add(): this {
-    throw new TypeError("Cannot mutate an immutable plugin snapshot");
-  }
-
-  override delete(): boolean {
-    throw new TypeError("Cannot mutate an immutable plugin snapshot");
-  }
-
-  override clear(): void {
-    throw new TypeError("Cannot mutate an immutable plugin snapshot");
-  }
-}
-
-function isPlainObject(value: object): value is Record<PropertyKey, unknown> {
-  const prototype = Object.getPrototypeOf(value);
-  return prototype === Object.prototype || prototype === null;
-}
-
-function immutableObject<T extends object>(value: T, seen: WeakMap<object, unknown>): T {
-  if (seen.has(value)) return seen.get(value) as T;
-
-  let proxy: T;
-  proxy = new Proxy(value, {
-    get(target, property) {
-      const result = Reflect.get(target, property, target);
-      if (typeof result === "function") return result.bind(proxy);
-      return clone(result, seen);
-    },
-    set() {
-      throw new TypeError("Cannot mutate an immutable plugin snapshot");
-    },
-    deleteProperty() {
-      throw new TypeError("Cannot mutate an immutable plugin snapshot");
-    },
-    defineProperty() {
-      throw new TypeError("Cannot mutate an immutable plugin snapshot");
-    },
-  });
-  seen.set(value, proxy);
-  return proxy;
-}
-
-function clone(value: unknown, seen = new WeakMap<object, unknown>()): unknown {
-  if (value === null || typeof value !== "object") return value;
-  if (seen.has(value)) return seen.get(value);
-  if (value instanceof Date) return new Date(value);
-  if (value instanceof RegExp) return new RegExp(value);
-  if (value instanceof Map) {
-    const copy = new ImmutableMap<unknown, unknown>([]);
-    seen.set(value, copy);
-    for (const [key, child] of value) {
-      Map.prototype.set.call(copy, clone(key, seen), clone(child, seen));
-    }
-    return copy;
-  }
-  if (value instanceof Set) {
-    const copy = new ImmutableSet<unknown>([]);
-    seen.set(value, copy);
-    for (const child of value) Set.prototype.add.call(copy, clone(child, seen));
-    return copy;
-  }
-  if (!Array.isArray(value) && !isPlainObject(value)) {
-    return immutableObject(value, seen);
-  }
-
-  const copy = Array.isArray(value) ? [] as unknown[] : Object.create(Object.getPrototypeOf(value));
-  seen.set(value, copy);
-  for (const key of Reflect.ownKeys(value)) {
-    const descriptor = Object.getOwnPropertyDescriptor(value, key);
-    if (descriptor && "value" in descriptor) {
-      Object.defineProperty(copy, key, { ...descriptor, value: clone(descriptor.value, seen) });
-    }
-  }
-  return copy;
-}
-
-function freeze<T>(value: T, seen = new WeakSet<object>()): T {
-  if (value === null || typeof value !== "object" || seen.has(value)) return value;
-  if (!Array.isArray(value) && !isPlainObject(value) && !(value instanceof Map) && !(value instanceof Set)) {
-    return value;
-  }
-  seen.add(value);
-  if (value instanceof Map) {
-    for (const [key, child] of value) {
-      freeze(key, seen);
-      freeze(child, seen);
-    }
-  } else if (value instanceof Set) {
-    for (const child of value) freeze(child, seen);
-  } else {
-    for (const key of Reflect.ownKeys(value)) {
-      const descriptor = Object.getOwnPropertyDescriptor(value, key);
-      if (descriptor && "value" in descriptor) freeze(descriptor.value, seen);
-    }
-  }
-  return Object.freeze(value);
-}
-
-function snapshot<T>(value: T): Readonly<T> {
-  return freeze(clone(value) as T);
 }
 
 function routeIdentity(page: FolioPage): string {
@@ -218,13 +49,8 @@ export class FolioPluginLifecycleManager {
     return snapshot(this.pages);
   }
 
-  async configResolved(): Promise<void> {
-    await this.runContextHook("configResolved");
-  }
-
-  async buildStart(): Promise<void> {
-    await this.runContextHook("buildStart");
-  }
+  async configResolved(): Promise<void> { await this.runContextHook("configResolved"); }
+  async buildStart(): Promise<void> { await this.runContextHook("buildStart"); }
 
   async pageCollected(page: FolioPage): Promise<void> {
     const collected = snapshot(page);
@@ -260,9 +86,7 @@ export class FolioPluginLifecycleManager {
     return snapshot(transformed);
   }
 
-  async generate(): Promise<void> {
-    await this.runContextHook("generate");
-  }
+  async generate(): Promise<void> { await this.runContextHook("generate"); }
 
   async buildEnd(result: FolioBuildResult): Promise<void> {
     for (const plugin of this.plugins) {
