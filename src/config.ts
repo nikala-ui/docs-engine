@@ -2,6 +2,7 @@
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import fs from "fs-extra";
+import { validateFolioPlugins } from "./plugin.js";
 import type { DocsConfig } from "./types.js";
 
 export const DEFAULT_DOCS_CONFIG: Required<Pick<DocsConfig, "title" | "description" | "contentDir">> & DocsConfig = {
@@ -46,6 +47,7 @@ export const DEFAULT_DOCS_CONFIG: Required<Pick<DocsConfig, "title" | "descripti
 };
 
 export function defineDocsConfig(config: DocsConfig): DocsConfig {
+  validateFolioPlugins(config.plugins);
   return config;
 }
 
@@ -72,6 +74,7 @@ export async function resolveDocsConfig(cwd: string = process.cwd()): Promise<Do
         // process. Bust Bun/Node's ESM module cache so changed values apply.
         const mod = await import(`${pathToFileURL(fullPath).href}?t=${Date.now()}`);
         const resolvedUserConfig: DocsConfig = mod.default || mod.config || {};
+        validateFolioPlugins(resolvedUserConfig.plugins);
         return {
           ...DEFAULT_DOCS_CONFIG,
           ...resolvedUserConfig,
@@ -104,6 +107,7 @@ export async function resolveDocsConfig(cwd: string = process.cwd()): Promise<Do
           },
         };
       } catch (error) {
+        if (error instanceof Error && error.message.startsWith("[folio]")) throw error;
         console.warn(`[folio] Failed to load config from ${filename}:`, error);
       }
     }
