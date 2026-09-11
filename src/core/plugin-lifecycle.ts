@@ -27,19 +27,91 @@ export interface FolioPluginLifecycleOptions {
   pages?: readonly FolioPage[];
 }
 
+export interface FolioPluginHookMetadata {
+  pluginName: string;
+  hook: LifecycleHook;
+  mode: FolioPluginContext["mode"];
+  pageRoute?: string;
+  sourcePath?: string;
+}
+
 export class FolioPluginHookError extends Error {
   readonly pluginName: string;
   readonly hook: LifecycleHook;
+  readonly mode: FolioPluginContext["mode"];
+  readonly pageRoute?: string;
+  readonly sourcePath?: string;
+  readonly metadata: FolioPluginHookMetadata;
   override readonly cause: unknown;
 
-  constructor(pluginName: string, hook: LifecycleHook, cause: unknown) {
+  constructor(
+    pluginName: string,
+    hook: LifecycleHook,
+    cause: unknown,
+    mode: FolioPluginContext["mode"],
+    page?: FolioPage,
+  ) {
     const detail = cause instanceof Error ? cause.message : String(cause);
-    super(`[folio] Plugin "${pluginName}" hook "${hook}" failed: ${detail}`, { cause });
+    const pageRoute = page?.url;
+    const sourcePath = page?.sourcePath ?? page?.filePath;
+    const location = [
+      pageRoute && `route "${pageRoute}"`,
+      sourcePath && `source "${sourcePath}"`,
+      `mode "${mode}"`,
+    ].join(", ");
+    super(`[folio] Plugin "${pluginName}" hook "${hook}" failed (${location}): ${detail}`, { cause });
     this.name = "FolioPluginHookError";
     this.pluginName = pluginName;
     this.hook = hook;
+    this.mode = mode;
+    this.pageRoute = pageRoute;
+    this.sourcePath = sourcePath;
+    this.metadata = { pluginName, hook, mode, pageRoute, sourcePath };
     this.cause = cause;
   }
+}
+
+class ImmutableMap<K, V> extends Map<K, V> {
+  constructor(entries: readonly (readonly [K, V])[]) {
+    super();
+    for (const [key, value] of entries) Map.prototype.set.call(this, key, value);
+  }
+
+  override set(): this {
+    throw new TypeError("Cannot mutate an immutable plugin snapshot");
+  }
+
+  override delete(): boolean {
+    throw new TypeError("Cannot mutate an immutable plugin snapshot");
+  }
+
+  override clear(): void {
+    throw new TypeError("Cannot mutate an immutable plugin snapshot");
+  }
+}
+
+class ImmutableSet<T> extends Set<T> {
+  constructor(values: readonly T[]) {
+    super();
+    for (const value of values) Set.prototype.add.call(this, value);
+  }
+
+  override add(): this {
+    throw new TypeError("Cannot mutate an immutable plugin snapshot");
+  }
+
+  override delete(): boolean {
+    throw new TypeError("Cannot mutate an immutable plugin snapshot");
+  }
+
+  override clear(): void {
+    throw new TypeError("Cannot mutate an immutable plugin snapshot");
+  }
+}
+
+function isPlainObject(value: object): value is Record<PropertyKey, unknown> {
+  const prototype = Object.getPrototypeOf(value);
+  return prototype === Object.prototype || prototype === null;
 }
 
 function clone(value: unknown, seen = new WeakMap<object, unknown>()): unknown {
@@ -47,21 +119,52 @@ function clone(value: unknown, seen = new WeakMap<object, unknown>()): unknown {
   if (seen.has(value)) return seen.get(value);
   if (value instanceof Date) return new Date(value);
   if (value instanceof RegExp) return new RegExp(value);
+  if (value instanceof Map) {
+    const copy = new ImmutableMap<unknown, unknown>([]);
+    seen.set(value, copy);
+    for (const [key, child] of value) {
+      Map.prototype.set.call(copy, clone(key, seen), clone(child, seen));
+    }
+    return copy;
+  }
+  if (value instanceof Set) {
+    const copy = new ImmutableSet<unknown>([]);
+    seen.set(value, copy);
+    for (const child of value) Set.prototype.add.call(copy, clone(child, seen));
+    return copy;
+  }
+  if (!Array.isArray(value) && !isPlainObject(value)) return value;
 
-  const copy = Array.isArray(value) ? [] as unknown[] : {} as Record<string, unknown>;
+  const copy = Array.isArray(value) ? [] as unknown[] : Object.create(Object.getPrototypeOf(value));
   seen.set(value, copy);
-  for (const key of Object.keys(value)) {
-    const child = clone((value as Record<string, unknown>)[key], seen);
-    if (Array.isArray(copy)) copy[Number(key)] = child;
-    else copy[key] = child;
+  for (const key of Reflect.ownKeys(value)) {
+    const descriptor = Object.getOwnPropertyDescriptor(value, key);
+    if (descriptor && "value" in descriptor) {
+      Object.defineProperty(copy, key, { ...descriptor, value: clone(descriptor.value, seen) });
+    }
   }
   return copy;
 }
 
 function freeze<T>(value: T, seen = new WeakSet<object>()): T {
   if (value === null || typeof value !== "object" || seen.has(value)) return value;
+  if (!Array.isArray(value) && !isPlainObject(value) && !(value instanceof Map) && !(value instanceof Set)) {
+    return value;
+  }
   seen.add(value);
-  for (const child of Object.values(value)) freeze(child, seen);
+  if (value instanceof Map) {
+    for (const [key, child] of value) {
+      freeze(key, seen);
+      freeze(child, seen);
+    }
+  } else if (value instanceof Set) {
+    for (const child of value) freeze(child, seen);
+  } else {
+    for (const key of Reflect.ownKeys(value)) {
+      const descriptor = Object.getOwnPropertyDescriptor(value, key);
+      if (descriptor && "value" in descriptor) freeze(descriptor.value, seen);
+    }
+  }
   return Object.freeze(value);
 }
 
@@ -104,7 +207,7 @@ export class FolioPluginLifecycleManager {
       try {
         await plugin.pageCollected?.(collected, this.context());
       } catch (error) {
-        throw this.wrap(plugin, "pageCollected", error);
+        throw this.wrap(plugin, "pageCollected", error, page);
       }
     }
   }
@@ -122,7 +225,7 @@ export class FolioPluginLifecycleManager {
         }
         transformed = snapshot(result);
       } catch (error) {
-        throw this.wrap(plugin, "pageTransformed", error);
+        throw this.wrap(plugin, "pageTransformed", error, page);
       }
     }
 
@@ -166,8 +269,10 @@ export class FolioPluginLifecycleManager {
     }
   }
 
-  private wrap(plugin: FolioPlugin, hook: LifecycleHook, error: unknown): FolioPluginHookError {
-    return error instanceof FolioPluginHookError ? error : new FolioPluginHookError(plugin.name, hook, error);
+  private wrap(plugin: FolioPlugin, hook: LifecycleHook, error: unknown, page?: FolioPage): FolioPluginHookError {
+    return error instanceof FolioPluginHookError
+      ? error
+      : new FolioPluginHookError(plugin.name, hook, error, this.options.mode, page);
   }
 }
 

@@ -114,4 +114,79 @@ describe("plugin lifecycle manager", () => {
     expect(() => (exposed as FolioPage[])[0].title = "changed").toThrow();
     expect(lifecycle.getPages()[0].title).toBe("Start");
   });
+
+  test("deeply snapshots maps, sets, arrays, and plain objects without cloning providers", async () => {
+    class Provider {
+      name = "custom";
+      search() { return []; }
+    }
+    const provider = new Provider();
+    const sourcePage = {
+      ...page,
+      frontmatter: {
+        title: "Start",
+        metadata: {
+          tags: new Set(["docs"]),
+          aliases: new Map([["start", ["guide/start"]]]),
+        },
+      },
+    } as FolioPage;
+    const config = {
+      title: "Docs",
+      search: { provider },
+      navigation: { sidebar: { nav: "auto" as const } },
+    };
+    let context!: Parameters<NonNullable<FolioPlugin["buildStart"]>>[0];
+    const lifecycle = createFolioPluginLifecycleManager({
+      plugins: [{ name: "observer", buildStart: (received) => { context = received; } }],
+      config,
+      rootDir: "/project",
+      contentDir: "/project/docs",
+      mode: "production",
+      logger: { debug() {}, info() {}, warn() {}, error() {} },
+      pages: [sourcePage],
+    });
+
+    await lifecycle.buildStart();
+    expect(context.config.search?.provider).toBe(provider);
+    const metadata = context.pages[0].frontmatter.metadata as {
+      tags: Set<string>;
+      aliases: Map<string, string[]>;
+    };
+    expect(() => metadata.tags.add("plugin")).toThrow();
+    expect(() => metadata.aliases.set("other", ["other"])).toThrow();
+    expect(() => metadata.aliases.get("start")?.push("changed")).toThrow();
+    expect(() => (metadata as unknown as { extra: string }).extra = "changed").toThrow();
+    expect(sourcePage.frontmatter.metadata).toEqual({
+      tags: new Set(["docs"]),
+      aliases: new Map([["start", ["guide/start"]]]),
+    });
+  });
+
+  test("adds page route, source path, and mode to page-hook failures", async () => {
+    const lifecycle = manager([{
+      name: "page-check",
+      pageTransformed: () => { throw new Error("invalid page"); },
+    }]);
+
+    try {
+      await lifecycle.pageTransformed({ ...page, sourcePath: "/content/guide/start.mdx" });
+      throw new Error("expected page hook to fail");
+    } catch (error) {
+      expect(error).toMatchObject({
+        name: "FolioPluginHookError",
+        pageRoute: "/guide/start",
+        sourcePath: "/content/guide/start.mdx",
+        mode: "production",
+        metadata: {
+          pageRoute: "/guide/start",
+          sourcePath: "/content/guide/start.mdx",
+          mode: "production",
+        },
+      });
+      expect((error as Error).message).toContain('route "/guide/start"');
+      expect((error as Error).message).toContain('source "/content/guide/start.mdx"');
+      expect((error as Error).message).toContain('mode "production"');
+    }
+  });
 });
