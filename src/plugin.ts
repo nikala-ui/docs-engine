@@ -10,12 +10,12 @@ export interface FolioPluginLogger {
 }
 
 export interface FolioPluginContext {
-  config: DocsConfig;
-  rootDir: string;
-  contentDir: string;
-  pages: readonly FolioPage[];
-  mode: "development" | "production";
-  logger: FolioPluginLogger;
+  readonly config: DocsConfig;
+  readonly rootDir: string;
+  readonly contentDir: string;
+  readonly pages: readonly FolioPage[];
+  readonly mode: "development" | "production";
+  readonly logger: FolioPluginLogger;
 }
 
 export interface FolioBuildResult {
