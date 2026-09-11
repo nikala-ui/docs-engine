@@ -114,6 +114,30 @@ function isPlainObject(value: object): value is Record<PropertyKey, unknown> {
   return prototype === Object.prototype || prototype === null;
 }
 
+function immutableObject<T extends object>(value: T, seen: WeakMap<object, unknown>): T {
+  if (seen.has(value)) return seen.get(value) as T;
+
+  let proxy: T;
+  proxy = new Proxy(value, {
+    get(target, property) {
+      const result = Reflect.get(target, property, target);
+      if (typeof result === "function") return result.bind(proxy);
+      return clone(result, seen);
+    },
+    set() {
+      throw new TypeError("Cannot mutate an immutable plugin snapshot");
+    },
+    deleteProperty() {
+      throw new TypeError("Cannot mutate an immutable plugin snapshot");
+    },
+    defineProperty() {
+      throw new TypeError("Cannot mutate an immutable plugin snapshot");
+    },
+  });
+  seen.set(value, proxy);
+  return proxy;
+}
+
 function clone(value: unknown, seen = new WeakMap<object, unknown>()): unknown {
   if (value === null || typeof value !== "object") return value;
   if (seen.has(value)) return seen.get(value);
@@ -133,7 +157,9 @@ function clone(value: unknown, seen = new WeakMap<object, unknown>()): unknown {
     for (const child of value) Set.prototype.add.call(copy, clone(child, seen));
     return copy;
   }
-  if (!Array.isArray(value) && !isPlainObject(value)) return value;
+  if (!Array.isArray(value) && !isPlainObject(value)) {
+    return immutableObject(value, seen);
+  }
 
   const copy = Array.isArray(value) ? [] as unknown[] : Object.create(Object.getPrototypeOf(value));
   seen.set(value, copy);

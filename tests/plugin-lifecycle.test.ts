@@ -115,10 +115,11 @@ describe("plugin lifecycle manager", () => {
     expect(lifecycle.getPages()[0].title).toBe("Start");
   });
 
-  test("deeply snapshots maps, sets, arrays, and plain objects without cloning providers", async () => {
+  test("deeply snapshots maps, sets, arrays, plain objects, and providers", async () => {
     class Provider {
       name = "custom";
       search() { return []; }
+      mutate() { this.name = "changed"; }
     }
     const provider = new Provider();
     const sourcePage = {
@@ -148,7 +149,12 @@ describe("plugin lifecycle manager", () => {
     });
 
     await lifecycle.buildStart();
-    expect(context.config.search?.provider).toBe(provider);
+    const exposedProvider = context.config.search?.provider as Provider;
+    expect(exposedProvider).toBeInstanceOf(Provider);
+    expect(exposedProvider.search()).toEqual([]);
+    expect(() => exposedProvider.mutate()).toThrow();
+    expect(() => exposedProvider.name = "changed").toThrow();
+    expect(provider.name).toBe("custom");
     const metadata = context.pages[0].frontmatter.metadata as {
       tags: Set<string>;
       aliases: Map<string, string[]>;
