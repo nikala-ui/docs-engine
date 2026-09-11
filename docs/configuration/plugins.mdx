@@ -1,0 +1,52 @@
+---
+title: Plugins
+description: Extend Folio with typed build-time plugins.
+order: 7
+---
+
+Folio plugins are build-time extensions. The first plugin contract defines the
+public types and registration boundary; lifecycle execution will be added in a
+separate milestone.
+
+## Register a plugin
+
+Create configured plugins with a factory, then register the returned plugin in
+`docs.config.ts`:
+
+```ts
+import { createFolioPlugin } from "@nikala-ui/folio";
+
+const reportPlugin = createFolioPlugin(
+  (options: { file: string }) => ({
+    name: "build-report",
+    generate(context) {
+      context.logger.info(`Would write ${options.file} for ${context.pages.length} pages`);
+    },
+  }),
+  { file: "build-report.json" },
+);
+
+export default { plugins: [reportPlugin] };
+```
+
+`defineFolioPlugin(plugin)` is available when a plugin does not need options.
+Both helpers validate the plugin registration and require a non-empty unique
+name in a `DocsConfig.plugins` array. Hook fields, when present, must be
+functions. Invalid registrations fail configuration loading with an actionable
+error.
+
+## Public contract
+
+`FolioPlugin` currently exposes these optional hooks:
+
+- `configResolved(context)`
+- `buildStart(context)`
+- `pageCollected(page, context)`
+- `pageTransformed(page, context)`
+- `generate(context)`
+- `buildEnd(result, context)`
+
+The context and result types are exported from `@nikala-ui/folio`. This
+milestone defines their shape only; Folio does not yet invoke these hooks.
+Plugin packages should keep feature-specific behavior (such as i18n, API
+documentation, or workspace discovery) outside the core package.
